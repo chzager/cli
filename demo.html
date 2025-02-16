@@ -41,6 +41,16 @@
 						}
 					}
 				},
+				"say-hello": (cli) => {
+					return new Promise((resolve) => {
+						cli.readLn("What's your name? ").then((name) => {
+							if (!!name) {
+								cli.writeLn("Hello, " + name + "!");
+							}
+							resolve();
+						});
+					});
+				},
 			};
 			var cli = new CommandLineInterpreter(cmds);
 		</script>

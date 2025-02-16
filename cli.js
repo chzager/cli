@@ -225,7 +225,6 @@ class CommandLineInterpreter
 				this.body.scrollTo(0, this.body.scrollHeight);
 				inputEle.focus();
 			}, 1);
-
 		};
 		if (!(target instanceof HTMLElement))
 		{
@@ -301,6 +300,41 @@ class CommandLineInterpreter
 	writeLn (text)
 	{
 		return this.write(text + "\n");
+	}
+
+	/**
+	 * Reads any user input from the CLI. The user must commit his input with _[Enter]_.
+	 * @param {string} [prompt] The prompt to be printed before the input. Default is "`> `".
+	 * @returns {Promise<string>} Returns the text that the user has entered.
+	 */
+	readLn (prompt)
+	{
+		return new Promise((resolve) =>
+		{
+			this.write(prompt ?? "> ");
+			let inputEle = CommandLineInterpreter.createElement("span.input[contenteditable='true'][spellcheck='false'][autocorrect='off'][autocapitalize='none']");
+			inputEle.onkeydown = (/** @type {KeyboardEvent} */ event) =>
+			{
+				event.stopImmediatePropagation();
+				let inputEle = /** @type {HTMLElement} */ (event.target);
+				switch (event.key)
+				{
+					case "Enter":
+					case "NumpadEnter":
+					case "Escape":
+						let inputString = (event.key === "Escape") ? "" : inputEle.innerText ?? "";
+						inputEle.remove();
+						this.writeLn(inputString);
+						resolve(inputString);
+				}
+			};
+			setTimeout(() =>
+			{ // Isolate from any event.
+				this.body.appendChild(inputEle);
+				this.body.scrollTo(0, this.body.scrollHeight);
+				inputEle.focus();
+			}, 1);
+		});
 	}
 
 	/**
