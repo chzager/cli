@@ -173,6 +173,7 @@ class CommandLineInterpreter
 					case "Enter":
 					case "NumpadEnter":
 						let inputString = inputEle.innerText;
+						let async = false;
 						inputEle.remove();
 						this.writeLn(inputString);
 						let inputValues = /(\S+)(.*)/.exec(inputString);
@@ -190,13 +191,28 @@ class CommandLineInterpreter
 							}
 							if (typeof commandFunction === "function")
 							{
-								commandFunction(this, ...commandArguments);
+								try
+								{
+									let cmdResult = commandFunction(this, ...commandArguments);
+									if (cmdResult instanceof Promise)
+									{
+										async = true;
+										cmdResult.then(() => __read());
+									}
+								}
+								catch (error)
+								{
+									console.error(error);
+								}
 							}
 							else
 							{
 								this.writeLn("Unknown command: " + command);
 							}
-							__read();
+							if (async === false)
+							{
+								__read();
+							}
 						}
 					// By intention no `break` here.
 					case "Escape":

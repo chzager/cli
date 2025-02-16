@@ -22,6 +22,25 @@
 				test: (cli) => {
 					cli.writeLn("Custom command succeed.");
 				},
+				wait: (cli, arg1) => {
+					if (arg1 === "--?") {
+						cli.writeLn("Usage: wait <ms>").writeLn("  <ms> is the number of milliseconds to be waited.");
+					} else if (!arg1) {
+						cli.writeLn("Missing argument: MS").writeLn("Type `wait --?` for help.");
+					} else {
+						if (/^[0-9]+$/.test(arg1)) {
+							cli.writeLn("Waiting...");
+							return new Promise((resolve) => {
+								setTimeout(() => {
+									cli.writeLn("Done waiting!");
+									resolve();
+								}, arg1);
+							});
+						} else {
+							cli.writeLn('Error: "' + arg1 + '" is not a valid number.');
+						}
+					}
+				},
 			};
 			var cli = new CommandLineInterpreter(cmds);
 		</script>
