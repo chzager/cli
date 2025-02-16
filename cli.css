@@ -1,0 +1,28 @@
+@import url("https://fonts.googleapis.com/css2?family=Azeret+Mono:ital,wght@0,100..700&display=swap");
+
+#CommandLineInterpreter {
+	background-color: #235;
+	color: #bbb;
+	font-family: "Azeret Mono";
+	font-size: 14px;
+	line-height: 1.5em;
+	margin: 0;
+	padding: 0.5em;
+	max-height: 100%;
+	height: 100%;
+	overflow-y: scroll;
+	box-sizing: border-box;
+	cursor: text;
+}
+
+#CommandLineInterpreter * {
+	background-color: inherit;
+	color: inherit;
+	font-family: inherit;
+	font-size: inherit;
+	padding: 0px;
+	margin: 0px;
+	border: medium;
+	outline: none;
+	white-space: pre;
+}

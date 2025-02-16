@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>Command Line Interpreter Demo Page</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<script src="cli.js"></script>
+		<link rel="stylesheet" href="cli.css" />
+		<style>
+			body {
+				padding: 0;
+				margin: 0;
+				height: 100vh;
+				max-height: 100vh;
+			}
+		</style>
+	</head>
+	<body>
+		<script>
+			/** @type {Record<string,CommandLineInterpreter_Command>} */
+			let cmds = {
+				test: (cli) => {
+					cli.writeLn("Custom command succeed.");
+				},
+			};
+			var cli = new CommandLineInterpreter(cmds);
+		</script>
+	</body>
+</html>
