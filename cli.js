@@ -67,7 +67,7 @@ class CommandLineInterpreter
 				{
 					let buildInCommandNames = Object.keys(CommandLineInterpreter.buildInCommands);
 					let validCommands = Array.from(cli.commands.keys()).filter((s) => !buildInCommandNames.includes(s));
-					cli.history = cli.history.filter((s) =>
+					cli.history = Array.from(new Set(cli.history)).filter((s) =>
 					{
 						let command = /^\S+/.exec(s)?.[0] ?? "";
 						return validCommands.includes(command);
