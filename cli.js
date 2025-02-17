@@ -120,7 +120,10 @@ class CommandLineInterpreter
 	};
 
 	// DOC
-	id;
+	get id ()
+	{
+		return this.constructor.name;
+	}
 
 	/**
 	 * This CLI's HTML element.
