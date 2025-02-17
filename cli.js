@@ -92,6 +92,30 @@ class CommandLineInterpreter
 					cli.writeLn("** The history is empty. **");
 				}
 			}
+		},
+		/** Prints all stored variables. */
+		"printvars": (cli, arg1) =>
+		{
+			if (arg1 === "--?")
+			{
+				cli.writeLn("Usage: printvars")
+					.writeLn("Prints all stored variables.");
+			}
+			else
+			{
+				if (cli.variables.size > 0)
+				{
+					let varEntries = Array.from(cli.variables.entries());
+					for (let [varName, varValue] of varEntries.sort((a, b) => a[0].localeCompare(b[0])))
+					{
+						cli.writeLn(varName + "=" + varValue);
+					}
+				}
+				else
+				{
+					cli.writeLn("** There are no variables defined. **");
+				}
+			}
 		}
 	};
 
@@ -181,33 +205,55 @@ class CommandLineInterpreter
 						{
 							historyPosition = (this.history[this.history.length - 1] !== inputString) ? this.history.push(inputString) : this.history.length;
 							this.memorize("history", this.history);
-							let command = inputValues[1];
-							let commandFunction = this.commands.get(command);
-							let argumentsString = (inputValues[2] ?? "").trim();
-							let commandArguments = [];
-							for (let argMatch of argumentsString.matchAll(/"([^"]*)"|'([^']*)'|\S+/g))
+							let variableAssignment = /^([a-z]\w*)=(.*)/i.exec(inputString);
+							if (variableAssignment)
 							{
-								commandArguments.push(argMatch[1] || argMatch[2] || argMatch[0]);
-							}
-							if (typeof commandFunction === "function")
-							{
-								try
+								let variableName = variableAssignment[1].trim();
+								let variableValue = variableAssignment[2].trim();
+								if (!!variableValue)
 								{
-									let cmdResult = commandFunction(this, ...commandArguments);
-									if (cmdResult instanceof Promise)
-									{
-										async = true;
-										cmdResult.then(() => __read());
-									}
+									this.variables.set(variableName, variableValue);
 								}
-								catch (error)
+								else
 								{
-									console.error(error);
+									this.variables.delete(variableName);
 								}
+								this.memorize("variables", Object.fromEntries(this.variables.entries()));
 							}
 							else
 							{
-								this.writeLn("Unknown command: " + command);
+								let command = inputValues[1];
+								let commandFunction = this.commands.get(command);
+								let argumentsString = (inputValues[2] ?? "").trim();
+								for (let [varName, varValue] of this.variables.entries())
+								{
+									argumentsString = argumentsString.replace(new RegExp("\\$\\" + varName + "\\b", "gi"), varValue);
+								}
+								let commandArguments = [];
+								for (let argMatch of argumentsString.matchAll(/"([^"]*)"|'([^']*)'|\S+/g))
+								{
+									commandArguments.push(argMatch[1] || argMatch[2] || argMatch[0]);
+								}
+								if (typeof commandFunction === "function")
+								{
+									try
+									{
+										let cmdResult = commandFunction(this, ...commandArguments);
+										if (cmdResult instanceof Promise)
+										{
+											async = true;
+											cmdResult.then(() => __read());
+										}
+									}
+									catch (error)
+									{
+										console.error(error);
+									}
+								}
+								else
+								{
+									this.writeLn("Unknown command: " + command);
+								}
 							}
 							if (async === false)
 							{
@@ -231,10 +277,15 @@ class CommandLineInterpreter
 			target = document.body;
 		}
 		this.history = [];
+		this.variables = new Map();
 		if (localStorage)
 		{
 			let storedData = JSON.parse(localStorage.getItem(this.id) || "{}");
 			this.history = storedData?.history ?? [];
+			for (let [varName, varValue] of Object.entries(storedData?.variables ?? {}))
+			{
+				this.variables.set(varName, varValue);
+			}
 		};
 		let historyPosition = this.history.length;
 		this.commands = new Map();
