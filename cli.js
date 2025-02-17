@@ -200,7 +200,7 @@ class CommandLineInterpreter
 						let async = false;
 						inputEle.remove();
 						this.writeLn(inputString);
-						let inputValues = /(\S+)(.*)/.exec(inputString);
+						let inputValues = /(\S+)(.*)/.exec(inputString.trim());
 						if (!!inputValues)
 						{
 							historyPosition = (this.history[this.history.length - 1] !== inputString) ? this.history.push(inputString) : this.history.length;
