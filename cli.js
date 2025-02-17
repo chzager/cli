@@ -119,11 +119,12 @@ class CommandLineInterpreter
 		}
 	};
 
-	// DOC
-	get id ()
-	{
-		return this.constructor.name;
-	}
+	/**
+	 * ID of the current CLI instance. This is used for appliance of CSS styles
+	 * and storing data in the browser's local storage.
+	 * @type {string}
+	 */
+	id;
 
 	/**
 	 * This CLI's HTML element.
@@ -136,6 +137,12 @@ class CommandLineInterpreter
 	 * @type {Map<string,Function>}
 	 */
 	commands;
+
+	/**
+	 * Options of this CLI.
+	 * @type {CommandLineInterpreter_Options}
+	 */
+	options;
 
 	/**
 	 * The input history. This is also stored in the `localStorage`.
@@ -152,12 +159,13 @@ class CommandLineInterpreter
 	/**
 	 * @param {Record<string,CommandLineInterpreter_CommandCallback>} commands Custom commands to be available in this CLI.
 	 * @param {HTMLElement} [target] HTML element on the document where the CLI element shall be displayed.
+	 * @param {CommandLineInterpreter_InitOptions} [options] Options for this CLI.
 	 */
-	constructor(commands, target)
+	constructor(commands, target, options)
 	{
 		const __read = () =>
 		{
-			this.write("\nCLI> ");
+			this.write(this.options.prompt);
 			let inputEle = CommandLineInterpreter.createElement("span.input[contenteditable='true'][spellcheck='false'][autocorrect='off'][autocapitalize='none']");
 			inputEle.onkeydown = (/** @type {KeyboardEvent} */ event) =>
 			{
@@ -259,10 +267,10 @@ class CommandLineInterpreter
 									this.writeLn("Unknown command: " + command);
 								}
 							}
-							if (async === false)
-							{
-								__read();
-							}
+						}
+						if (async === false)
+						{
+							__read();
 						}
 						break;
 					case "Escape":
@@ -276,10 +284,10 @@ class CommandLineInterpreter
 				inputEle.focus();
 			}, 1);
 		};
-		if (!(target instanceof HTMLElement))
-		{
-			target = document.body;
-		}
+		this.options = Object.assign({
+			prompt: "\nCLI> "
+		}, options);
+		this.id = options?.id || this.constructor.name;
 		this.history = [];
 		this.variables = new Map();
 		if (localStorage)
@@ -317,6 +325,10 @@ class CommandLineInterpreter
 				}
 			}
 		};
+		if (!(target instanceof HTMLElement))
+		{
+			target = document.body;
+		}
 		target.appendChild(this.body);
 		/** @type {HTMLStyleElement} */
 		// @ts-ignore - Missing properties.
@@ -334,6 +346,10 @@ class CommandLineInterpreter
 			+ "outline: none;"
 			+ "white-space: pre;"
 			+ "}");
+		if (!!options?.motd)
+		{
+			this.writeLn(options.motd);
+		}
 		__read();
 	}
 

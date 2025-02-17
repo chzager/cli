@@ -17,6 +17,11 @@
 	</head>
 	<body>
 		<script>
+			/** @type {CommandLineInterpreter_Options} */
+			let opts = {
+				motd: "Welcome to _Command Line Interpreter!_\n" + "https://github.com/chzager/cli\n" + "Type `help` for a list of available commands.",
+				// prompt: "\n$: ",
+			};
 			/** @type {Record<string,CommandLineInterpreter_Command>} */
 			let cmds = {
 				test: (cli) => {
@@ -52,7 +57,7 @@
 					});
 				},
 			};
-			var cli = new CommandLineInterpreter(cmds);
+			var cli = new CommandLineInterpreter(cmds, null, opts);
 		</script>
 	</body>
 </html>
