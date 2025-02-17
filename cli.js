@@ -318,6 +318,22 @@ class CommandLineInterpreter
 			}
 		};
 		target.appendChild(this.body);
+		/** @type {HTMLStyleElement} */
+		// @ts-ignore - Missing properties.
+		let styleElement = CommandLineInterpreter.createElement("style");
+		document.head.appendChild(styleElement);
+		// @ts-ignore - Possible 'null'.
+		styleElement.sheet.insertRule("#" + this.constructor.name + " * {"
+			+ "background-color: transparent;"
+			+ "color: inherit;"
+			+ "font-family: inherit;"
+			+ "font-size: inherit;"
+			+ "padding: 0;"
+			+ "margin: 0;"
+			+ "border: none;"
+			+ "outline: none;"
+			+ "white-space: pre;"
+			+ "}");
 		__read();
 	}
 
