@@ -2,7 +2,7 @@
 
 #CommandLineInterpreter {
 	background-color: #235;
-	color: #bbb;
+	color: #ccc;
 	font-family: "Azeret Mono";
 	font-size: 14px;
 	line-height: 1.5em;
@@ -25,4 +25,41 @@
 	border: medium;
 	outline: none;
 	white-space: pre;
+}
+
+#CommandLineInterpreter em {
+	font-weight: bold;
+	font-style: normal;
+}
+
+#CommandLineInterpreter code {
+	color: #bbd;
+	background-color: #457;
+	border-radius: 0.3em;
+	padding: 0 0.2em;
+}
+
+#CommandLineInterpreter .black {
+	color: #777;
+}
+#CommandLineInterpreter .red {
+	color: #f22;
+}
+#CommandLineInterpreter .green {
+	color: #4e4;
+}
+#CommandLineInterpreter .yellow {
+	color: #ed2;
+}
+#CommandLineInterpreter .blue {
+	color: #46f;
+}
+#CommandLineInterpreter .magenta {
+	color: #e4e;
+}
+#CommandLineInterpreter .cyan {
+	color: #4de;
+}
+#CommandLineInterpreter .white {
+	color: #fff;
 }

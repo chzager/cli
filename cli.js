@@ -201,8 +201,9 @@ class CommandLineInterpreter
 					case "NumpadEnter":
 						let inputString = inputEle.innerText;
 						let async = false;
-						inputEle.remove();
-						this.writeLn(inputString);
+						inputEle.classList.remove("input");
+						inputEle.contentEditable = "false";
+						inputEle.innerText += "\n";
 						let inputValues = /(\S+)(.*)/.exec(inputString.trim());
 						if (!!inputValues)
 						{
@@ -263,7 +264,7 @@ class CommandLineInterpreter
 								__read();
 							}
 						}
-					// By intention no `break` here.
+						break;
 					case "Escape":
 						inputEle.innerText = "";
 				}
@@ -342,7 +343,77 @@ class CommandLineInterpreter
 	 */
 	write (text)
 	{
-		this.body.appendChild(CommandLineInterpreter.createElement("span", text));
+		const __format = (/** @type {string} */ text) =>
+		{
+			let tags = /\*|_|`|https?:\/\//;
+			let chunks = [];
+			let tag = tags.exec(text);
+			let safeConter = 0;
+			while (!!tag)
+			{
+				let fmtChar = tag[0];
+				if (["*", "_", "`"].includes(fmtChar))
+				{
+					let tagRex = new RegExp("(^|\\s)\\" + fmtChar + "([^\\" + fmtChar + "\\s](.*?[^\\" + fmtChar + "\\s])*?)\\" + fmtChar + "(\\W|$)");
+					let htmlTag = "span";
+					switch (fmtChar)
+					{
+						case "*":
+							htmlTag = "em";
+							break;
+						case "_":
+							htmlTag = "i";
+							break;
+						case "`":
+							htmlTag = "code";
+							break;
+					}
+					let tagContent = tagRex.exec(text);
+					if (!!tagContent)
+					{
+						let tagIndex = text.indexOf(tagContent[2]);
+						chunks.push(text.substring(0, tagIndex - 1));
+						chunks.push(CommandLineInterpreter.createElement(htmlTag, tagContent[2]));
+						text = text.substring(tagIndex + tagContent[2].length + 1);
+					}
+					else
+					{
+						chunks.push(text.substring(0, tag.index + 1));
+						text = text.substring(tag.index + 1);
+					}
+				}
+				else if (tag[0].startsWith("http"))
+				{
+					let url = /https?:\/\/(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])/i.exec(text);
+					if (!!url)
+					{
+						let tagIndex = text.indexOf(url[0]);
+						chunks.push(text.substring(0, tagIndex));
+						chunks.push(CommandLineInterpreter.createElement("a[href='" + url[0] + "'][target='_blank']", url[0]));
+						text = text.substring(tagIndex + url[0].length);
+					}
+				}
+				tag = tags.exec(text);
+				safeConter += 1;
+				if (safeConter > 1e4)
+				{
+					tag = null;
+				}
+			}
+			chunks.push(text);
+			return chunks;
+		};
+		for (let chunk of __format(text))
+		{
+			if (chunk instanceof HTMLElement)
+			{
+				this.body.appendChild(chunk);
+			}
+			else if (!!chunk)
+			{
+				this.body.appendChild(CommandLineInterpreter.createElement("span", chunk));
+			}
+		}
 		this.body.scrollTo(0, this.body.scrollHeight);
 		return this;
 	};
@@ -377,8 +448,9 @@ class CommandLineInterpreter
 					case "NumpadEnter":
 					case "Escape":
 						let inputString = (event.key === "Escape") ? "" : inputEle.innerText ?? "";
-						inputEle.remove();
-						this.writeLn(inputString);
+						inputEle.classList.remove("input");
+						inputEle.contentEditable = "false";
+						inputEle.innerText += "\n";
 						resolve(inputString);
 				}
 			};
