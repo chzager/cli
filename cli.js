@@ -4,36 +4,37 @@
  * Command Line Interpreter.
  *
  * https://github.com/chzager/cli
+ *
  * @copyright (c) 2025 Christoph Zager
  * @license MIT
  */
 class CommandLineInterpreter
 {
 	/**
-	 * The basic build-in commands for every CLI.
-	 * @type {Record<string,CommandLineInterpreter_CommandCallback>}
+	 * The basic built-in commands for every CLI.
+	 * @type {Record<string, CommandLineInterpreter_CommandCallback>}
 	 */
-	static buildInCommands = {
+	static builtInCommands = {
 		/** Clears everything from the CLI. */
 		"clear": (cli, arg1) =>
 		{
 			if (arg1 === "--?")
 			{
 				cli.writeLn("Usage: clear")
-					.writeLn("Clears all output.");
+					.writeLn("Clear all output.");
 			}
 			else
 			{
 				cli.body.replaceChildren();
 			}
 		},
-		/** Prints a list of all avalibale commands (including the internal ones) to the CLI. */
+		/** Prints a list of all available commands (including the internal ones) to the CLI. */
 		"help": (cli, arg1) =>
 		{
 			if (arg1 === "--?")
 			{
 				cli.writeLn("Usage: help")
-					.writeLn("Prints a list of all available commands.");
+					.writeLn("Display a list of all available commands.");
 			}
 			else
 			{
@@ -42,7 +43,7 @@ class CommandLineInterpreter
 				{
 					cli.writeLn(" ".repeat(2) + command);
 				}
-				cli.writeLn("type `<command> --?` for help on a specific command.");
+				cli.writeLn("Type `<command> --?` for help on a specific command.");
 			}
 		},
 		/** Prints the input history. */
@@ -50,11 +51,11 @@ class CommandLineInterpreter
 		{
 			if (arg1 === "--?")
 			{
-				cli.writeLn("Usage: history [OPTIONS]")
-					.writeLn("Prints a list of all that has been entered.")
-					.writeLn("Options:")
-					.writeLn("  --clean  Removes duplicate entries and invalid commands from the history.")
-					.writeLn("  --clear  Clears the entire history.");
+				cli.writeLn("Usage: history [OPTION]")
+					.writeLn("Display or manipulate the list of all that has been entered.")
+					.writeLn("Optional arguments to manipulate the history:")
+					.writeLn("    --clean  Remove duplicate entries and invalid commands")
+					.writeLn("    --clear  Clear the entire history");
 			}
 			else
 			{
@@ -65,8 +66,8 @@ class CommandLineInterpreter
 				}
 				else if (arg1 === "--clean")
 				{
-					let buildInCommandNames = Object.keys(CommandLineInterpreter.buildInCommands);
-					let validCommands = Array.from(cli.commands.keys()).filter((s) => !buildInCommandNames.includes(s));
+					let builtInCommandNames = Object.keys(CommandLineInterpreter.builtInCommands);
+					let validCommands = Array.from(cli.commands.keys()).filter((s) => !builtInCommandNames.includes(s));
 					cli.history = Array.from(new Set(cli.history)).filter((s) =>
 					{
 						let command = /^\S+/.exec(s)?.[0] ?? "";
@@ -77,7 +78,7 @@ class CommandLineInterpreter
 				}
 				else if (!!arg1)
 				{
-					cli.writeLn("Unknown argument: " + arg1);
+					cli.writeLn(`Unknown argument: ${arg1}`);
 					return;
 				}
 				if (cli.history.length > 0)
@@ -99,7 +100,7 @@ class CommandLineInterpreter
 			if (arg1 === "--?")
 			{
 				cli.writeLn("Usage: printvars")
-					.writeLn("Prints all stored variables.");
+					.writeLn("Display all stored variables.");
 			}
 			else
 			{
@@ -108,7 +109,7 @@ class CommandLineInterpreter
 					let varEntries = Array.from(cli.variables.entries());
 					for (let [varName, varValue] of varEntries.sort((a, b) => a[0].localeCompare(b[0])))
 					{
-						cli.writeLn(varName + "=" + varValue);
+						cli.writeLn(`${varName}=${varValue}`);
 					}
 				}
 				else
@@ -134,7 +135,7 @@ class CommandLineInterpreter
 
 	/**
 	 * Available commands in this CLI.
-	 * @type {Map<string,Function>}
+	 * @type {Map<string, Function>}
 	 */
 	commands;
 
@@ -152,12 +153,12 @@ class CommandLineInterpreter
 
 	/**
 	 * Variables that are defined with a value in this CLI.
-	 * @type {Map<string,string>}
+	 * @type {Map<string, string>}
 	 */
 	variables;
 
 	/**
-	 * @param {Record<string,CommandLineInterpreter_CommandCallback>} commands Custom commands to be available in this CLI.
+	 * @param {Record<string, CommandLineInterpreter_CommandCallback>} commands Custom commands to be available in this CLI.
 	 * @param {HTMLElement} [target] HTML element on the document where the CLI element shall be displayed.
 	 * @param {CommandLineInterpreter_InitOptions} [options] Options for this CLI.
 	 */
@@ -256,7 +257,7 @@ class CommandLineInterpreter
 							}
 							else
 							{
-								this.writeLn("Unknown command: " + command);
+								this.writeLn(`Unknown command: ${command}`);
 							}
 						}
 					}
@@ -283,7 +284,7 @@ class CommandLineInterpreter
 		};
 		let historyPosition = this.history.length;
 		this.commands = new Map();
-		for (let commandProvider of [CommandLineInterpreter.buildInCommands, commands])
+		for (let commandProvider of [CommandLineInterpreter.builtInCommands, commands])
 		{
 			for (let [command, func] of Object.entries(commandProvider))
 			{
@@ -317,17 +318,17 @@ class CommandLineInterpreter
 		let styleElement = CommandLineInterpreter.createElement("style");
 		document.head.appendChild(styleElement);
 		// @ts-ignore - Possible 'null'.
-		styleElement.sheet.insertRule("#" + this.constructor.name + " * {"
-			+ "background-color: transparent;"
-			+ "color: inherit;"
-			+ "font-family: inherit;"
-			+ "font-size: inherit;"
-			+ "padding: 0;"
-			+ "margin: 0;"
-			+ "border: none;"
-			+ "outline: none;"
-			+ "white-space: pre;"
-			+ "}");
+		styleElement.sheet.insertRule(`#${this.constructor.name} * {
+				background-color: transparent;
+				color: inherit;
+				font-family: inherit;
+				font-size: inherit;
+				padding: 0;
+				margin: 0;
+				border: none;
+				outline: none;
+				white-space: pre;
+			}`);
 		if (!!options?.motd)
 		{
 			this.writeLn(options.motd);
@@ -340,13 +341,13 @@ class CommandLineInterpreter
 	 *
 	 * You should use either {@linkcode readLn()} or {@linkcode readKey()}.
 	 * @param {string} prompt The prompt to be printed before the input.
-	 * @param {(ev: KeyboardEvent) => any} keyHandler Event handler for keyborad events.
+	 * @param {(ev: KeyboardEvent) => any} keyHandler Event handler for keyboard events.
 	 * @protected
 	 */
 	receiveInput (prompt, keyHandler)
 	{
 		this.write(prompt);
-		let inputEle = CommandLineInterpreter.createElement("span.input[contenteditable='true'][spellcheck='false'][autocorrect='off'][autocapitalize='none']");
+		let inputEle = CommandLineInterpreter.createElement(`span.input[contenteditable="true"][spellcheck="false"][autocorrect="off"][autocapitalize="none"]`);
 		inputEle.onkeydown = (/** @type {KeyboardEvent} */ event) =>
 		{
 			event.stopImmediatePropagation();
@@ -373,7 +374,7 @@ class CommandLineInterpreter
 
 	/**
 	 * Stores data in the browser's `localStorage`.
-	 * @param {string} key Key (identifier) of the data to be sroted.
+	 * @param {string} key Key (identifier) of the data to be stored.
 	 * @param {any} data Data to be stored.
 	 * @private
 	 */
@@ -398,7 +399,7 @@ class CommandLineInterpreter
 			let tags = /\*|_|`|https?:\/\//;
 			let chunks = [];
 			let tag = tags.exec(text);
-			let safeConter = 0;
+			let safeCounter = 0;
 			while (!!tag)
 			{
 				let fmtChar = tag[0];
@@ -439,13 +440,13 @@ class CommandLineInterpreter
 					{
 						let tagIndex = text.indexOf(url[0]);
 						chunks.push(text.substring(0, tagIndex));
-						chunks.push(CommandLineInterpreter.createElement("a[href='" + url[0] + "'][target='_blank']", url[0]));
+						chunks.push(CommandLineInterpreter.createElement(`a[href="${url[0]}"][target="_blank"]`, url[0]));
 						text = text.substring(tagIndex + url[0].length);
 					}
 				}
 				tag = tags.exec(text);
-				safeConter += 1;
-				if (safeConter > 1e4)
+				safeCounter += 1;
+				if (safeCounter > 1e4)
 				{
 					tag = null;
 				}
@@ -469,7 +470,7 @@ class CommandLineInterpreter
 	};
 
 	/**
-	 * Just like `write()`, but adds a new line. Jou should prefere this over `write()`.
+	 * Just like `write()`, but adds a new line. You should prefer this over `write()`.
 	 * @param {string} text Text to be written.
 	 */
 	writeLn (text)
