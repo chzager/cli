@@ -176,7 +176,7 @@ class CommandLineInterpreter
 					this.body.scrollBy(0, (this.body.clientHeight - 10));
 					break;
 				case "ArrowUp":
-					if (historyPosition > 0)
+					if ((historyPosition > 0) && (this.history.length > 0))
 					{
 						historyPosition -= 1;
 						inputEle.innerText = this.history[historyPosition];
