@@ -163,126 +163,108 @@ class CommandLineInterpreter
 	 */
 	constructor(commands, target, options)
 	{
-		const __read = () =>
+		const keyHandler = (/** @type {KeyboardEvent} */ event) =>
 		{
-			this.write(this.options.prompt);
-			let inputEle = CommandLineInterpreter.createElement("span.input[contenteditable='true'][spellcheck='false'][autocorrect='off'][autocapitalize='none']");
-			inputEle.onkeydown = (/** @type {KeyboardEvent} */ event) =>
+			let inputEle = /** @type {HTMLElement} */ (event.target);
+			switch (event.key)
 			{
-				event.stopImmediatePropagation();
-				let inputEle = /** @type {HTMLElement} */ (event.target);
-				switch (event.key)
-				{
-					case "PageUp":
-						this.body.scrollBy(0, 0 - (this.body.clientHeight - 10));
-						break;
-					case "PageDown":
-						this.body.scrollBy(0, (this.body.clientHeight - 10));
-						break;
-					case "ArrowUp":
-						if (historyPosition > 0)
+				case "PageUp":
+					this.body.scrollBy(0, 0 - (this.body.clientHeight - 10));
+					break;
+				case "PageDown":
+					this.body.scrollBy(0, (this.body.clientHeight - 10));
+					break;
+				case "ArrowUp":
+					if (historyPosition > 0)
+					{
+						historyPosition -= 1;
+						inputEle.innerText = this.history[historyPosition];
+						setTimeout(() =>
 						{
-							historyPosition -= 1;
-							inputEle.innerText = this.history[historyPosition];
-							setTimeout(() =>
+							let range = document.createRange();
+							let selection = window.getSelection();
+							if (!!selection)
 							{
-								let range = document.createRange();
-								let selection = window.getSelection();
-								if (!!selection)
-								{
-									range.setStart(inputEle.childNodes[0], inputEle.innerText.length);
-									range.setEnd(inputEle.childNodes[0], inputEle.innerText.length);
-									selection.removeAllRanges();
-									selection.addRange(range);
-								}
-							}, 1);
-						};
-						break;
-					case "ArrowDown":
-						if (historyPosition < this.history.length)
+								range.setStart(inputEle.childNodes[0], inputEle.innerText.length);
+								range.setEnd(inputEle.childNodes[0], inputEle.innerText.length);
+								selection.removeAllRanges();
+								selection.addRange(range);
+							}
+						}, 1);
+					};
+					break;
+				case "ArrowDown":
+					if (historyPosition < this.history.length)
+					{
+						historyPosition += 1;
+						inputEle.innerText = (historyPosition === this.history.length) ? "" : this.history[historyPosition];
+					};
+					break;
+				case "Enter":
+				case "NumpadEnter":
+					let inputString = inputEle.innerText;
+					let async = false;
+					let inputValues = /(\S+)(.*)/.exec(inputString.trim());
+					if (!!inputValues)
+					{
+						historyPosition = (this.history[this.history.length - 1] !== inputString) ? this.history.push(inputString) : this.history.length;
+						this.memorize("history", this.history);
+						let variableAssignment = /^([a-z]\w*)=(.*)/i.exec(inputString);
+						if (variableAssignment)
 						{
-							historyPosition += 1;
-							inputEle.innerText = (historyPosition === this.history.length) ? "" : this.history[historyPosition];
-						};
-						break;
-					case "Enter":
-					case "NumpadEnter":
-						let inputString = inputEle.innerText;
-						let async = false;
-						inputEle.classList.remove("input");
-						inputEle.contentEditable = "false";
-						inputEle.innerText += "\n";
-						let inputValues = /(\S+)(.*)/.exec(inputString.trim());
-						if (!!inputValues)
-						{
-							historyPosition = (this.history[this.history.length - 1] !== inputString) ? this.history.push(inputString) : this.history.length;
-							this.memorize("history", this.history);
-							let variableAssignment = /^([a-z]\w*)=(.*)/i.exec(inputString);
-							if (variableAssignment)
+							let variableName = variableAssignment[1].trim();
+							let variableValue = variableAssignment[2].trim();
+							if (!!variableValue)
 							{
-								let variableName = variableAssignment[1].trim();
-								let variableValue = variableAssignment[2].trim();
-								if (!!variableValue)
-								{
-									this.variables.set(variableName, variableValue);
-								}
-								else
-								{
-									this.variables.delete(variableName);
-								}
-								this.memorize("variables", Object.fromEntries(this.variables.entries()));
+								this.variables.set(variableName, variableValue);
 							}
 							else
 							{
-								let command = inputValues[1];
-								let commandFunction = this.commands.get(command);
-								let argumentsString = (inputValues[2] ?? "").trim();
-								for (let [varName, varValue] of this.variables.entries())
+								this.variables.delete(variableName);
+							}
+							this.memorize("variables", Object.fromEntries(this.variables.entries()));
+						}
+						else
+						{
+							let command = inputValues[1];
+							let commandFunction = this.commands.get(command);
+							let argumentsString = (inputValues[2] ?? "").trim();
+							for (let [varName, varValue] of this.variables.entries())
+							{
+								argumentsString = argumentsString.replace(new RegExp("\\$\\" + varName + "\\b", "gi"), varValue);
+							}
+							let commandArguments = [];
+							for (let argMatch of argumentsString.matchAll(/"([^"]*)"|'([^']*)'|\S+/g))
+							{
+								commandArguments.push(argMatch[1] || argMatch[2] || argMatch[0]);
+							}
+							if (typeof commandFunction === "function")
+							{
+								try
 								{
-									argumentsString = argumentsString.replace(new RegExp("\\$\\" + varName + "\\b", "gi"), varValue);
-								}
-								let commandArguments = [];
-								for (let argMatch of argumentsString.matchAll(/"([^"]*)"|'([^']*)'|\S+/g))
-								{
-									commandArguments.push(argMatch[1] || argMatch[2] || argMatch[0]);
-								}
-								if (typeof commandFunction === "function")
-								{
-									try
+									let cmdResult = commandFunction(this, ...commandArguments);
+									if (cmdResult instanceof Promise)
 									{
-										let cmdResult = commandFunction(this, ...commandArguments);
-										if (cmdResult instanceof Promise)
-										{
-											async = true;
-											cmdResult.then(() => __read());
-										}
-									}
-									catch (error)
-									{
-										console.error(error);
+										async = true;
+										cmdResult.then(() => this.receiveInput(this.options.prompt, keyHandler));
 									}
 								}
-								else
+								catch (error)
 								{
-									this.writeLn("Unknown command: " + command);
+									console.error(error);
 								}
 							}
+							else
+							{
+								this.writeLn("Unknown command: " + command);
+							}
 						}
-						if (async === false)
-						{
-							__read();
-						}
-						break;
-					case "Escape":
-						inputEle.innerText = "";
-				}
-			};
-			setTimeout(() =>
-			{ // Isolate from any event.
-				this.body.appendChild(inputEle);
-				this.body.scrollTo(0, this.body.scrollHeight);
-				inputEle.focus();
-			}, 1);
+					}
+					if (async === false)
+					{
+						this.receiveInput(this.options.prompt, keyHandler);
+					}
+			}
 		};
 		this.options = Object.assign({
 			prompt: "\nCLI> "
@@ -350,7 +332,43 @@ class CommandLineInterpreter
 		{
 			this.writeLn(options.motd);
 		}
-		__read();
+		this.receiveInput(this.options.prompt, keyHandler);
+	}
+
+	/**
+	 * Internal generic user input receiver.
+	 *
+	 * You should use either {@linkcode readLn()} or {@linkcode readKey()}.
+	 * @param {string} prompt The prompt to be printed before the input.
+	 * @param {(ev: KeyboardEvent) => any} keyHandler Event handler for keyborad events.
+	 * @protected
+	 */
+	receiveInput (prompt, keyHandler)
+	{
+		this.write(prompt);
+		let inputEle = CommandLineInterpreter.createElement("span.input[contenteditable='true'][spellcheck='false'][autocorrect='off'][autocapitalize='none']");
+		inputEle.onkeydown = (/** @type {KeyboardEvent} */ event) =>
+		{
+			event.stopImmediatePropagation();
+			switch (event.key)
+			{
+				case "Escape":
+					inputEle.innerText = "";
+					break;
+				case "Enter":
+				case "NumpadEnter":
+					event.preventDefault();
+					inputEle.replaceWith(CommandLineInterpreter.createElement("span", inputEle.innerText + "\n"));
+					break;
+			}
+			keyHandler(event);
+		};
+		setTimeout(() =>
+		{ // Isolate from any event.
+			this.body.appendChild(inputEle);
+			this.body.scrollTo(0, this.body.scrollHeight);
+			inputEle.focus();
+		}, 1);
 	}
 
 	/**
@@ -460,38 +478,84 @@ class CommandLineInterpreter
 	}
 
 	/**
+	 * Requires the user to press a single key.
+	 * @param {string} keys Set of keys from which one is awaited (e.g. `"yn"` to expect either "Y" or "N" to be pressed). You can use ranges here (e.g. `"1-9"` for any key between "1" and "9").
+	 * @param {string} [prompt] The prompt to be printed before the input.
+	 * @returns {Promise<string>} Returns the key that the user has pressed.
+	 */
+	readKey (keys, prompt)
+	{
+		return new Promise((resolve) =>
+		{
+			let keysRex = new RegExp("^[" + keys + "]$", "i");
+			this.receiveInput(prompt || keys.split("").join("/").toUpperCase() + "? ",
+				(/** @type {KeyboardEvent} */ event) =>
+				{
+					event.preventDefault();
+					let inputEle = /** @type {HTMLElement} */ (event.target);
+					if ((keysRex.test(event.key)) || (event.key === "Escape"))
+					{
+						let inputKey = (event.key === "Escape") ? "" : event.key ?? "";
+						inputEle.replaceWith(CommandLineInterpreter.createElement("span", inputKey + "\n"));
+						resolve(inputKey.toUpperCase());
+					}
+				});
+		});
+	}
+
+	/**
+	 * Reads any user input from the CLI but does not show the input on screen.
+	 * The user must commit his input with _[Enter]_.
+	 * @param {string} [prompt] The prompt to be printed before the input. Default is `"> "`.
+	 * @returns {Promise<string>} Returns the secret that the user has entered.
+	 */
+	readSecret (prompt)
+	{
+		return new Promise((resolve) =>
+		{
+			let secret = "";
+			this.receiveInput(prompt || "> ",
+				(/** @type {KeyboardEvent} */ event) =>
+				{
+					switch (event.key)
+					{
+						case "Enter":
+						case "NumpadEnter":
+							resolve(secret);
+							break;
+						case "Backspace":
+							secret = secret.substring(0, secret.length - 1);
+							break;
+						default:
+							if (event.key.length === 1)
+							{
+								event.preventDefault();
+								secret += event.key;
+							}
+					}
+				});
+		});
+	}
+
+	/**
 	 * Reads any user input from the CLI. The user must commit his input with _[Enter]_.
-	 * @param {string} [prompt] The prompt to be printed before the input. Default is "`> `".
+	 * @param {string} [prompt] The prompt to be printed before the input. Default is `"> "`.
 	 * @returns {Promise<string>} Returns the text that the user has entered.
 	 */
 	readLn (prompt)
 	{
 		return new Promise((resolve) =>
 		{
-			this.write(prompt ?? "> ");
-			let inputEle = CommandLineInterpreter.createElement("span.input[contenteditable='true'][spellcheck='false'][autocorrect='off'][autocapitalize='none']");
-			inputEle.onkeydown = (/** @type {KeyboardEvent} */ event) =>
-			{
-				event.stopImmediatePropagation();
-				let inputEle = /** @type {HTMLElement} */ (event.target);
-				switch (event.key)
+			this.receiveInput(prompt || "> ",
+				(/** @type {KeyboardEvent} */ event) =>
 				{
-					case "Enter":
-					case "NumpadEnter":
-					case "Escape":
-						let inputString = (event.key === "Escape") ? "" : inputEle.innerText ?? "";
-						inputEle.classList.remove("input");
-						inputEle.contentEditable = "false";
-						inputEle.innerText += "\n";
-						resolve(inputString);
-				}
-			};
-			setTimeout(() =>
-			{ // Isolate from any event.
-				this.body.appendChild(inputEle);
-				this.body.scrollTo(0, this.body.scrollHeight);
-				inputEle.focus();
-			}, 1);
+					switch (event.key)
+					{
+						case "Enter":
+						case "NumpadEnter":
+							resolve( /** @type {HTMLElement} */(event.target).innerText.trim());
+					}
+				});
 		});
 	}
 
