@@ -19,8 +19,11 @@
 		<script>
 			/** @type {CommandLineInterpreter_Options} */
 			let opts = {
-				motd: "Welcome to _Command Line Interpreter!_\n" + "https://github.com/chzager/cli\n" + "Type `help` for a list of available commands.",
+				motd: "Welcome to _Command Line Interpreter!_\n" +
+					"https://github.com/chzager/cli\n" + 
+					"Type `help` for a list of available commands.",
 				// prompt: "\n$: ",
+				// richText: false,
 			};
 			/** @type {Record<string,CommandLineInterpreter_Command>} */
 			let cmds = {
@@ -29,9 +32,11 @@
 				},
 				wait: (cli, arg1) => {
 					if (arg1 === "--?") {
-						cli.writeLn("Usage: wait <ms>").writeLn("  <ms> is the number of milliseconds to be waited.");
+						cli.writeLn("Usage: wait <ms>")
+							.writeLn("    ms  The number of milliseconds to be waited");
 					} else if (!arg1) {
-						cli.writeLn("Missing argument: MS").writeLn("Type `wait --?` for help.");
+						cli.writeLn("Missing argument: MS")
+							.writeLn("Type `wait --?` for help.");
 					} else {
 						if (/^[0-9]+$/.test(arg1)) {
 							cli.writeLn("Waiting...");
@@ -42,7 +47,7 @@
 								}, arg1);
 							});
 						} else {
-							cli.writeLn('Error: "' + arg1 + '" is not a valid number.');
+							cli.writeLn("Error: \"" + arg1 + "\" is not a valid number.");
 						}
 					}
 				},
@@ -56,18 +61,40 @@
 						});
 					});
 				},
+				q: (cli) => {
+					return new Promise((resolve) => {
+						cli.readKey("yn").then((k) => {
+							if (!!k) {
+								cli.writeLn("\"" + k + "\" pressed");
+							}
+							resolve();
+						});
+					});
+				},
+				pass: (cli) => {
+					return new Promise((resolve) => {
+						cli.readSecret("Tell me a secret... ").then((secret) => {
+							cli.writeLn(secret);
+							resolve();
+						});
+					});
+				},
 				colors: (cli) => {
-					cli.writeLn(["Command Line Interpreter supports colorful rich text.",
-					"To colorize text, use the escape-sequence `\\x1b[XXm` in your string, where \"XX\" is the value of the desired color:",
-					"  30 \x1b[30mBlack\x1b[0m",
-					"  31 \x1b[31mRed\x1b[0m",
-					"  32 \x1b[32mGreen\x1b[0m",
-					"  33 \x1b[33mYellow\x1b[0m",
-					"  34 \x1b[34mBlue\x1b[0m",
-					"  35 \x1b[35mMagenta\x1b[0m",
-					"  36 \x1b[36mCyan\x1b[0m",
-					"  37 \x1b[37mWhite\x1b[0m",
-					"   0 \x1b[0mDefault"].join("\n"));
+					if (cli.options.richText) {
+						cli.writeLn(["Command Line Interpreter is capable of colorized text.",
+							"To set the text color, use the escape-sequence `\\x1b[XXm` in your string, where \"XX\" is the value of the desired color:",
+							"  30 \x1b[30mBlack\x1b[0m",
+							"  31 \x1b[31mRed\x1b[0m",
+							"  32 \x1b[32mGreen\x1b[0m",
+							"  33 \x1b[33mYellow\x1b[0m",
+							"  34 \x1b[34mBlue\x1b[0m",
+							"  35 \x1b[35mMagenta\x1b[0m",
+							"  36 \x1b[36mCyan\x1b[0m",
+							"  37 \x1b[37mWhite\x1b[0m",
+							"   0 \x1b[0mDefault"].join("\n"));
+					} else {
+						cli.writeLn("Command Line Interpreter supports colorful rich text, but in this instance, rich text is disabled.");
+					}
 				},
 			};
 			var cli = new CommandLineInterpreter(cmds, null, opts);

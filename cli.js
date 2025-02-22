@@ -15,7 +15,7 @@ class CommandLineInterpreter
 	 * @type {Record<string, CommandLineInterpreter_CommandCallback>}
 	 */
 	static builtInCommands = {
-		/** Clears everything from the CLI. */
+		/** Clear the entire output. */
 		"clear": (cli, arg1) =>
 		{
 			if (arg1 === "--?")
@@ -28,7 +28,7 @@ class CommandLineInterpreter
 				cli.body.replaceChildren();
 			}
 		},
-		/** Prints a list of all available commands (including the internal ones) to the CLI. */
+		/** Display a list of all available commands (including the internal ones). */
 		"help": (cli, arg1) =>
 		{
 			if (arg1 === "--?")
@@ -43,10 +43,10 @@ class CommandLineInterpreter
 				{
 					cli.writeLn(" ".repeat(2) + command);
 				}
-				cli.writeLn("Type `<command> --?` for help on a specific command.");
+				cli.writeLn("\nType `<command> --?` for help on a specific command.");
 			}
 		},
-		/** Prints the input history. */
+		/** Display or manipulate the input history. */
 		"history": (cli, arg1) =>
 		{
 			if (arg1 === "--?")
@@ -94,7 +94,7 @@ class CommandLineInterpreter
 				}
 			}
 		},
-		/** Prints all stored variables. */
+		/** Display all stored variables. */
 		"printvars": (cli, arg1) =>
 		{
 			if (arg1 === "--?")
@@ -166,7 +166,7 @@ class CommandLineInterpreter
 	{
 		const keyHandler = (/** @type {KeyboardEvent} */ event) =>
 		{
-			let inputEle = /** @type {HTMLElement} */ (event.target);
+			let inputEle = /** @type {HTMLElement} */(event.target);
 			switch (event.key)
 			{
 				case "PageUp":
@@ -278,10 +278,7 @@ class CommandLineInterpreter
 		{
 			let storedData = JSON.parse(localStorage.getItem(this.id) || "{}");
 			this.history = storedData?.history ?? [];
-			for (let [varName, varValue] of Object.entries(storedData?.variables ?? {}))
-			{
-				this.variables.set(varName, varValue);
-			}
+			Object.entries(storedData?.variables ?? {}).map(([n, v]) => this.variables.set(n, v));
 		};
 		let historyPosition = this.history.length;
 		this.commands = new Map();
@@ -295,7 +292,20 @@ class CommandLineInterpreter
 				}
 			}
 		}
-		// @ts-ignore - Missing deprecated property 'align'.
+		document.head.appendChild(CommandLineInterpreter.createElement(
+			"style",
+			`#${this.constructor.name} * {${[
+				"background-color: transparent;",
+				"color: inherit;",
+				"font-family: inherit;",
+				"font-size: inherit;",
+				"padding: 0;",
+				"margin: 0;",
+				"border: none;",
+				"outline: none;",
+				"white-space: pre-wrap;"].join("")}}`
+		));
+		// @ts-ignore missing deprecated property 'align'.
 		this.body = CommandLineInterpreter.createElement("div");
 		this.body.id = this.constructor.name;
 		this.body.onclick = () =>
@@ -314,22 +324,6 @@ class CommandLineInterpreter
 			target = document.body;
 		}
 		target.appendChild(this.body);
-		/** @type {HTMLStyleElement} */
-		// @ts-ignore - Missing properties.
-		let styleElement = CommandLineInterpreter.createElement("style");
-		document.head.appendChild(styleElement);
-		// @ts-ignore - Possible 'null'.
-		styleElement.sheet.insertRule(`#${this.constructor.name} * {
-				background-color: transparent;
-				color: inherit;
-				font-family: inherit;
-				font-size: inherit;
-				padding: 0;
-				margin: 0;
-				border: none;
-				outline: none;
-				white-space: pre;
-			}`);
 		if (!!options?.motd)
 		{
 			this.writeLn(options.motd);
@@ -546,10 +540,10 @@ class CommandLineInterpreter
 	}
 
 	/**
-	 * Requires the user to press a single key.
+	 * Require the user to press a single key.
 	 * @param {string} keys Set of keys from which one is awaited (e.g. `"yn"` to expect either "Y" or "N" to be pressed). You can use ranges here (e.g. `"1-9"` for any key between "1" and "9").
 	 * @param {string} [prompt] The prompt to be printed before the input.
-	 * @returns {Promise<string>} Returns the key that the user has pressed.
+	 * @returns {Promise<string>} The key that the user has pressed.
 	 */
 	readKey (keys, prompt)
 	{
@@ -565,7 +559,7 @@ class CommandLineInterpreter
 				if (keysRex.test(event.key))
 				{
 					let inputKey = event.key;
-					let inputEle = /** @type {HTMLElement} */ (event.target);
+					let inputEle = /** @type {HTMLElement} */(event.target);
 					inputEle.replaceWith(CommandLineInterpreter.createElement("span", inputKey + "\n"));
 					resolve(inputKey.toUpperCase());
 				}
@@ -580,10 +574,10 @@ class CommandLineInterpreter
 	}
 
 	/**
-	 * Reads any user input from the CLI but does not show the input on screen.
+	 * Read any user input from the CLI but does not show the input on screen.
 	 * The user must commit his input with _[Enter]_.
 	 * @param {string} [prompt] The prompt to be printed before the input. Default is `"> "`.
-	 * @returns {Promise<string>} Returns the secret that the user has entered.
+	 * @returns {Promise<string>} The secret that the user has entered.
 	 */
 	readSecret (prompt)
 	{
@@ -614,9 +608,9 @@ class CommandLineInterpreter
 	}
 
 	/**
-	 * Reads any user input from the CLI. The user must commit his input with _[Enter]_.
+	 * Read any user input from the CLI. The user must commit his input with [Enter].
 	 * @param {string} [prompt] The prompt to be printed before the input. Default is `"> "`.
-	 * @returns {Promise<string>} Returns the text that the user has entered.
+	 * @returns {Promise<string>} The text that the user has entered.
 	 */
 	readLn (prompt)
 	{
@@ -629,17 +623,17 @@ class CommandLineInterpreter
 					{
 						case "Enter":
 						case "NumpadEnter":
-							resolve( /** @type {HTMLElement} */(event.target).innerText.trim());
+							resolve(/** @type {HTMLElement} */(event.target).innerText.trim());
 					}
 				});
 		});
 	}
 
 	/**
-	 * Creates a new HTML elemement.
+	 * Create a new HTML elemement.
 	 * @param {string} tag The tag of the desired HTML element. This may include css classes and attributes.
 	 * @param {...string|HTMLElement} children Content (or child elements) to be created on/in the HTML element.
-	 * @returns Returns the newly created HTML element.
+	 * @returns The newly created HTML element.
 	 */
 	static createElement (tag, ...children)
 	{
