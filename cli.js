@@ -548,18 +548,26 @@ class CommandLineInterpreter
 		return new Promise((resolve) =>
 		{
 			let keysRex = new RegExp("^[" + keys + "]$", "i");
-			this.receiveInput(prompt || keys.split("").join("/").toUpperCase() + "? ",
-				(/** @type {KeyboardEvent} */ event) =>
+			this.write(prompt || keys.split("").join("/").toUpperCase() + "? ");
+			let inputEle = CommandLineInterpreter.createElement(`span.input[contenteditable="true"][spellcheck="false"][autocorrect="off"][autocapitalize="none"]`);
+			inputEle.onkeydown = (/** @type {KeyboardEvent} */ event) =>
+			{
+				event.stopImmediatePropagation();
+				event.preventDefault();
+				if (keysRex.test(event.key))
 				{
-					event.preventDefault();
+					let inputKey = event.key;
 					let inputEle = /** @type {HTMLElement} */ (event.target);
-					if ((keysRex.test(event.key)) || (event.key === "Escape"))
-					{
-						let inputKey = (event.key === "Escape") ? "" : event.key ?? "";
-						inputEle.replaceWith(CommandLineInterpreter.createElement("span", inputKey + "\n"));
-						resolve(inputKey.toUpperCase());
-					}
-				});
+					inputEle.replaceWith(CommandLineInterpreter.createElement("span", inputKey + "\n"));
+					resolve(inputKey.toUpperCase());
+				}
+			};
+			setTimeout(() =>
+			{ // Isolate from any event.
+				this.body.appendChild(inputEle);
+				this.body.scrollTo(0, this.body.scrollHeight);
+				inputEle.focus();
+			}, 1);
 		});
 	}
 
