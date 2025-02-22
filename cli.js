@@ -268,7 +268,8 @@ class CommandLineInterpreter
 			}
 		};
 		this.options = Object.assign({
-			prompt: "\nCLI> "
+			prompt: "\nCLI> ",
+			richText: true
 		}, options);
 		this.id = options?.id || this.constructor.name;
 		this.history = [];
@@ -513,16 +514,23 @@ class CommandLineInterpreter
 			chunks.push(text);
 			return chunks;
 		};
-		for (let chunk of __colorize(text))
+		if (this.options.richText)
 		{
-			if (chunk instanceof HTMLElement)
+			for (let chunk of __colorize(text))
 			{
-				this.body.appendChild(chunk);
+				if (chunk instanceof HTMLElement)
+				{
+					this.body.appendChild(chunk);
+				}
+				else if (!!chunk)
+				{
+					this.body.appendChild(CommandLineInterpreter.createElement("span", chunk));
+				}
 			}
-			else if (!!chunk)
-			{
-				this.body.appendChild(CommandLineInterpreter.createElement("span", chunk));
-			}
+		}
+		else
+		{
+			this.body.appendChild(CommandLineInterpreter.createElement("span", text.replace(/\x1b\[\d+m/g, "")));
 		}
 		this.body.scrollTo(0, this.body.scrollHeight);
 		return this;
