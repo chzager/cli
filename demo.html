@@ -56,6 +56,19 @@
 						});
 					});
 				},
+				colors: (cli) => {
+					cli.writeLn(["Command Line Interpreter supports colorful rich text.",
+					"To colorize text, use the escape-sequence `\\x1b[XXm` in your string, where \"XX\" is the value of the desired color:",
+					"  30 \x1b[30mBlack\x1b[0m",
+					"  31 \x1b[31mRed\x1b[0m",
+					"  32 \x1b[32mGreen\x1b[0m",
+					"  33 \x1b[33mYellow\x1b[0m",
+					"  34 \x1b[34mBlue\x1b[0m",
+					"  35 \x1b[35mMagenta\x1b[0m",
+					"  36 \x1b[36mCyan\x1b[0m",
+					"  37 \x1b[37mWhite\x1b[0m",
+					"   0 \x1b[0mDefault"].join("\n"));
+				},
 			};
 			var cli = new CommandLineInterpreter(cmds, null, opts);
 		</script>

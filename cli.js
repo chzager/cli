@@ -394,6 +394,65 @@ class CommandLineInterpreter
 	 */
 	write (text)
 	{
+		const __colorize = (/** @type {string} */ text) =>
+		{
+			let colorRex = /\x1b\[((3[0-7]|0)m)/g;
+			let colorTags = Array.from(text.matchAll(colorRex)).map((m) => Object.assign({ colorKey: m[2], index: m.index }));
+			if (colorTags.length > 0)
+			{
+				let chunks = [];
+				if (colorTags[0].index > 0)
+				{
+					colorTags.unshift({ colorKey: "0", index: 0 });
+				}
+				colorTags.map((t, i) => Object.assign(t, { length: colorTags[i + 1]?.index ?? text.length }));
+				for (let colorTag of colorTags)
+				{
+					let subText = text.substring(colorTag.index, colorTag.length).replace(colorRex, "");
+					if (colorTag.colorKey === "0")
+					{
+						chunks.push(...__format(subText));
+					}
+					else
+					{
+						let color = "--cli-color-foreground";
+						switch (colorTag.colorKey)
+						{
+							case "30":
+								color = "--cli-color-black";
+								break;
+							case "31":
+								color = "--cli-color-red";
+								break;
+							case "32":
+								color = "--cli-color-green";
+								break;
+							case "33":
+								color = "--cli-color-yellow";
+								break;
+							case "34":
+								color = "--cli-color-blue";
+								break;
+							case "35":
+								color = "--cli-color-magenta";
+								break;
+							case "36":
+								color = "--cli-color-cyan";
+								break;
+							case "37":
+								color = "--cli-color-white";
+								break;
+						}
+						chunks.push(CommandLineInterpreter.createElement(`span[style="color:var(${color}"]`, ...__format(subText)));
+					}
+				}
+				return chunks;
+			}
+			else
+			{
+				return __format(text);
+			}
+		};
 		const __format = (/** @type {string} */ text) =>
 		{
 			let tags = /\*|_|`|https?:\/\//;
@@ -454,7 +513,7 @@ class CommandLineInterpreter
 			chunks.push(text);
 			return chunks;
 		};
-		for (let chunk of __format(text))
+		for (let chunk of __colorize(text))
 		{
 			if (chunk instanceof HTMLElement)
 			{
