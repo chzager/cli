@@ -1,4 +1,3 @@
-/// <reference path="./cli.d.js" />
 // @ts-check
 /**
  * Command Line Interpreter.

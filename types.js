@@ -8,12 +8,12 @@
  *
  * @typedef CommandLineInterpreter_Options
  * Options of the current `CommandLineInterpreter` instance.
- * @property {string} prompt String to be used as the prompt.
- * @property {boolean} richText Enable or disable formatting the text on the CLI.
+ * @property {string} prompt String to be used as command prompt.
+ * @property {boolean} richText Enable or disable formatting the output text on the CLI.
  *
  * @callback CommandLineInterpreter_CommandCallback
  * Callback type for functions ("commands") of the `CommandLineInterpreter`.
- * @param {CommandLineInterpreter} cli The `CommandLineInterpreter` that is calling this.
+ * @param {CommandLineInterpreter} cli The calling `CommandLineInterpreter`.
  * @param {...string} args Arguments given by the user in the command line.
  * @returns {void|Promise<void>}
  *
