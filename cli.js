@@ -15,57 +15,60 @@ class CommandLineInterpreter
 	 * @type {Record<string, CommandLineInterpreter_CommandCallback>}
 	 */
 	static builtInCommands = {
-		/** Clear the entire output. */
-		"clear": (cli, arg1) =>
+		/** Clear the entire output of the current session. */
+		"clear": (cli, ...args) =>
 		{
-			if (arg1 === "--?")
+			switch (args?.[0])
 			{
-				cli.writeLn("Usage: clear")
-					.writeLn("Clear all output.");
-			}
-			else
-			{
-				cli.body.replaceChildren();
+				case "--?":
+					cli.writeLn("Usage: clear")
+						.writeLn("Clear all output.");
+					break;
+				case undefined:
+					cli.body.replaceChildren();
+					break;
+				default:
+					cli.writeLn(`clear: Invalid argument: ${args[0]}`);
 			}
 		},
-		/** Display a list of all available commands (including the internal ones). */
-		"help": (cli, arg1) =>
+		/** Display a list of all available commands (including the built-in). */
+		"help": (cli, ...args) =>
 		{
-			if (arg1 === "--?")
+			switch (args?.[0])
 			{
-				cli.writeLn("Usage: help")
-					.writeLn("Display a list of all available commands.");
-			}
-			else
-			{
-				cli.writeLn("These are the available commands:");
-				for (let command of Array.from(cli.commands.keys()).sort())
-				{
-					cli.writeLn(" ".repeat(2) + command);
-				}
-				cli.writeLn("\nType `<command> --?` for help on a specific command.");
+				case "--?":
+					cli.writeLn("Usage: help")
+						.writeLn("Display a list of all available commands.");
+					break;
+				case undefined:
+					cli.writeLn("These are the available commands:");
+					for (let command of Array.from(cli.commands.keys()).sort())
+					{
+						cli.writeLn(`  ${command}`);
+					}
+					cli.writeLn("\nType `<command> --?` for help on a specific command.");
+					break;
+				default:
+					cli.writeLn(`help: Invalid argument: ${args[0]}`);
 			}
 		},
 		/** Display or manipulate the input history. */
-		"history": (cli, arg1) =>
+		"history": (cli, ...args) =>
 		{
-			if (arg1 === "--?")
+			switch (args?.[0])
 			{
-				cli.writeLn("Usage: history [OPTION]")
-					.writeLn("Display or manipulate the list of all that has been entered.")
-					.writeLn("Optional arguments to manipulate the history:")
-					.writeLn("    --clean  Remove duplicate entries and invalid commands")
-					.writeLn("    --clear  Clear the entire history");
-			}
-			else
-			{
-				if (arg1 === "--clear")
-				{
+				case "--?":
+					cli.writeLn("Usage: history [option]")
+						.writeLn("Display or manipulate the list of all that has been entered.")
+						.writeLn("Optional arguments to manipulate the history:")
+						.writeLn("    --clean  Remove duplicate entries and invalid commands")
+						.writeLn("    --clear  Clear the entire history");
+					break;
+				case "--clear":
 					cli.history = [];
 					cli.memorize("history", cli.history);
-				}
-				else if (arg1 === "--clean")
-				{
+					break;
+				case "--clean":
 					let builtInCommandNames = Object.keys(CommandLineInterpreter.builtInCommands);
 					let validCommands = Array.from(cli.commands.keys()).filter((s) => !builtInCommandNames.includes(s));
 					cli.history = Array.from(new Set(cli.history)).filter((s) =>
@@ -75,47 +78,49 @@ class CommandLineInterpreter
 					});
 					cli.memorize("history", cli.history);
 					cli.writeLn("** The history has been cleaned. **");
-				}
-				else if (!!arg1)
-				{
-					cli.writeLn(`Unknown argument: ${arg1}`);
-					return;
-				}
-				if (cli.history.length > 0)
-				{
-					for (let item of cli.history)
+					break;
+				case undefined:
+					if (cli.history.length > 0)
 					{
-						cli.writeLn(item);
+						for (let item of cli.history)
+						{
+							cli.writeLn(item);
+						}
 					}
-				}
-				else
-				{
-					cli.writeLn("** The history is empty. **");
-				}
+					else
+					{
+						cli.writeLn("** The history is empty. **");
+					}
+					break;
+				default:
+					cli.writeLn(`history: Invalid argument: ${args[0]}`);
 			}
 		},
 		/** Display all stored variables. */
-		"printvars": (cli, arg1) =>
+		"printvars": (cli, ...args) =>
 		{
-			if (arg1 === "--?")
+			switch (args?.[0])
 			{
-				cli.writeLn("Usage: printvars")
-					.writeLn("Display all stored variables.");
-			}
-			else
-			{
-				if (cli.variables.size > 0)
-				{
-					let varEntries = Array.from(cli.variables.entries());
-					for (let [varName, varValue] of varEntries.sort((a, b) => a[0].localeCompare(b[0])))
+				case "--?":
+					cli.writeLn("Usage: printvars")
+						.writeLn("Display all stored variables.");
+					break;
+				case undefined:
+					if (cli.variables.size > 0)
 					{
-						cli.writeLn(`${varName}=${varValue}`);
+						let varEntries = Array.from(cli.variables.entries());
+						for (let [varName, varValue] of varEntries.sort((a, b) => a[0].localeCompare(b[0])))
+						{
+							cli.writeLn(`${varName}=${varValue}`);
+						}
 					}
-				}
-				else
-				{
-					cli.writeLn("** There are no variables defined. **");
-				}
+					else
+					{
+						cli.writeLn("** There are no variables defined. **");
+					}
+					break;
+				default:
+					cli.writeLn(`printvars: Invalid argument: ${args[0]}`);
 			}
 		}
 	};
