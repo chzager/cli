@@ -191,7 +191,7 @@ class CommandLineInterpreter
 								selection.removeAllRanges();
 								selection.addRange(range);
 							}
-						}, 1);
+						}, 10);
 					};
 					break;
 				case "ArrowDown":
@@ -204,6 +204,7 @@ class CommandLineInterpreter
 				case "Enter":
 				case "NumpadEnter":
 					let inputString = inputEle.innerText;
+					inputEle.replaceWith(CommandLineInterpreter.createElement("span", inputString + "\n"));
 					let async = false;
 					let inputValues = /(\S+)(.*)/.exec(inputString.trim());
 					if (!!inputValues)
@@ -346,17 +347,6 @@ class CommandLineInterpreter
 		inputEle.onkeydown = (/** @type {KeyboardEvent} */ event) =>
 		{
 			event.stopImmediatePropagation();
-			switch (event.key)
-			{
-				case "Escape":
-					inputEle.innerText = "";
-					break;
-				case "Enter":
-				case "NumpadEnter":
-					event.preventDefault();
-					inputEle.replaceWith(CommandLineInterpreter.createElement("span", inputEle.innerText + "\n"));
-					break;
-			}
 			keyHandler(event);
 		};
 		setTimeout(() =>
@@ -364,7 +354,7 @@ class CommandLineInterpreter
 			this.body.appendChild(inputEle);
 			this.body.scrollTo(0, this.body.scrollHeight);
 			inputEle.focus();
-		}, 1);
+		}, 10);
 	}
 
 	/**
@@ -384,7 +374,8 @@ class CommandLineInterpreter
 	};
 
 	/**
-	 * Writes the given text to the CLI. Usually you should rather use `writeLn()` which adds a new line at the end.
+	 * Writes the given text to the CLI on screen. Usually you should rather
+	 *  use {@linkcode writeLn()} which adds a new line at the end of the text.
 	 * @param {string} text Text to be written.
 	 */
 	write (text)
@@ -531,7 +522,8 @@ class CommandLineInterpreter
 	};
 
 	/**
-	 * Just like `write()`, but adds a new line. You should prefer this over `write()`.
+	 * Just like {@linkcode write()}, but adds a new line at the end of the text.
+	 *  You should prefer this over `write()`.
 	 * @param {string} text Text to be written.
 	 */
 	writeLn (text)
@@ -541,35 +533,58 @@ class CommandLineInterpreter
 
 	/**
 	 * Require the user to press a single key.
-	 * @param {string} keys Set of keys from which one is awaited (e.g. `"yn"` to expect either "Y" or "N" to be pressed). You can use ranges here (e.g. `"1-9"` for any key between "1" and "9").
+	 * @param {Array<string>} keys Set of acceptable keys. This may include special
+	 *  keys such as "Enter" or "Escape". See [MDN reference](https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values).
 	 * @param {string} [prompt] The prompt to be printed before the input.
-	 * @returns {Promise<string>} The key that the user has pressed.
+	 * @returns {Promise<string>} A `Promise` that resolves to the pressed key.
+	 *  Does not resolve for keys outside the defined set.
 	 */
 	readKey (keys, prompt)
 	{
 		return new Promise((resolve) =>
 		{
-			let keysRex = new RegExp("^[" + keys + "]$", "i");
-			this.write(prompt || keys.split("").join("/").toUpperCase() + "? ");
-			let inputEle = CommandLineInterpreter.createElement(`span.input[contenteditable="true"][spellcheck="false"][autocorrect="off"][autocapitalize="none"]`);
-			inputEle.onkeydown = (/** @type {KeyboardEvent} */ event) =>
-			{
-				event.stopImmediatePropagation();
-				event.preventDefault();
-				if (keysRex.test(event.key))
+			let lKeys = [...keys.map((k) => k.toLowerCase())];
+			this.receiveInput(prompt || keys.join("/").toUpperCase() + "? ",
+				(/** @type {KeyboardEvent} */ event) =>
 				{
-					let inputKey = event.key;
-					let inputEle = /** @type {HTMLElement} */(event.target);
-					inputEle.replaceWith(CommandLineInterpreter.createElement("span", inputKey + "\n"));
-					resolve(inputKey.toUpperCase());
-				}
-			};
-			setTimeout(() =>
-			{ // Isolate from any event.
-				this.body.appendChild(inputEle);
-				this.body.scrollTo(0, this.body.scrollHeight);
-				inputEle.focus();
-			}, 1);
+					if (/^f\d/i.test(event.key) === false)
+					{
+						event.preventDefault();
+						if (lKeys.includes(event.key.toLowerCase()))
+						{
+							let inputKey = event.key;
+							let inputEle = /** @type {HTMLElement} */(event.target);
+							inputEle.replaceWith(CommandLineInterpreter.createElement("span", inputKey + "\n"));
+							resolve(inputKey.toUpperCase());
+						}
+					}
+				});
+		});
+	}
+
+	/**
+	 * Read any user input from the CLI. The user must commit his input with [Enter].
+	 * @param {string} [prompt] The prompt to be printed before the input. Default is `"> "`.
+	 * @returns {Promise<string>} A `Promise` that resolves to the entered text.
+	 */
+	readLn (prompt)
+	{
+		return new Promise((resolve) =>
+		{
+			this.receiveInput(prompt || "> ",
+				(/** @type {KeyboardEvent} */ event) =>
+				{
+					let inputEle = /** @type {HTMLElement} */ (event.target);
+					switch (event.key)
+					{
+						case "Escape":
+							inputEle.innerText = "";
+							break;
+						case "Enter":
+							inputEle.replaceWith(CommandLineInterpreter.createElement("span", inputEle.innerText + "\n"));
+							resolve(inputEle.innerText);
+					}
+				});
 		});
 	}
 
@@ -577,7 +592,7 @@ class CommandLineInterpreter
 	 * Read any user input from the CLI but does not show the input on screen.
 	 * The user must commit his input with _[Enter]_.
 	 * @param {string} [prompt] The prompt to be printed before the input. Default is `"> "`.
-	 * @returns {Promise<string>} The secret that the user has entered.
+	 * @returns {Promise<string>} A `Promise` that resolves to the entered secret as a plain string.
 	 */
 	readSecret (prompt)
 	{
@@ -590,7 +605,8 @@ class CommandLineInterpreter
 					switch (event.key)
 					{
 						case "Enter":
-						case "NumpadEnter":
+							let inputEle = /** @type {HTMLElement} */ (event.target);
+							inputEle.replaceWith(CommandLineInterpreter.createElement("span", "\n"));
 							resolve(secret);
 							break;
 						case "Backspace":
@@ -602,28 +618,6 @@ class CommandLineInterpreter
 								event.preventDefault();
 								secret += event.key;
 							}
-					}
-				});
-		});
-	}
-
-	/**
-	 * Read any user input from the CLI. The user must commit his input with [Enter].
-	 * @param {string} [prompt] The prompt to be printed before the input. Default is `"> "`.
-	 * @returns {Promise<string>} The text that the user has entered.
-	 */
-	readLn (prompt)
-	{
-		return new Promise((resolve) =>
-		{
-			this.receiveInput(prompt || "> ",
-				(/** @type {KeyboardEvent} */ event) =>
-				{
-					switch (event.key)
-					{
-						case "Enter":
-						case "NumpadEnter":
-							resolve(/** @type {HTMLElement} */(event.target).innerText.trim());
 					}
 				});
 		});
