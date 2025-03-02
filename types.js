@@ -3,8 +3,12 @@
  * Initialization options for the `CommandLineInterpreter`.
  * @property {string} [id] If your web page uses more than one CLI, you may specify unique IDs here.
  * @property {string} [motd] "Message of the day". This text is printed when the CLI is initialized.
- * @property {string} [prompt] String to be used as the prompt. Default is `"\nCLI>"` which includes a new line before the prompt.
+ * @property {string} [prompt] String to be used as the prompt. Default is `"\nCLI> "` which includes
+ *  a new line before the prompt.
  * @property {boolean} [richText] Enable or disable formatting the text on the CLI. Default is `true`.
+ * @property {string} [startup] Commands or variable assignments to be executed at startup (after the
+ *  MOTD is printed but before the first input prompt). Multiple commands/assignments are separated
+ *  by semi-colon (`;`) or line break (`\n`).
  *
  * @typedef CommandLineInterpreter_Options
  * Options of the current `CommandLineInterpreter` instance.
