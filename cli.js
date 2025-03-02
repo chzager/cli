@@ -206,70 +206,18 @@ class CommandLineInterpreter
 					};
 					break;
 				case "Enter":
-				case "NumpadEnter":
 					let inputString = inputEle.innerText;
 					inputEle.replaceWith(CommandLineInterpreter.createElement("span", inputString + "\n"));
-					let async = false;
-					let inputValues = /(\S+)(.*)/.exec(inputString.trim());
-					if (!!inputValues)
+					if (/\w/.test(inputString))
 					{
-						historyPosition = (this.history[this.history.length - 1] !== inputString) ? this.history.push(inputString) : this.history.length;
+						historyPosition = (this.history[this.history.length - 1] !== inputString) ? this.history.push(inputString.trim()) : this.history.length;
 						this.memorize("history", this.history);
-						let variableAssignment = /^([a-z]\w*)=(.*)/i.exec(inputString);
-						if (variableAssignment)
-						{
-							let variableName = variableAssignment[1].trim();
-							let variableValue = variableAssignment[2].trim();
-							if (!!variableValue)
-							{
-								this.variables.set(variableName, variableValue);
-							}
-							else
-							{
-								this.variables.delete(variableName);
-							}
-							this.memorize("variables", Object.fromEntries(this.variables.entries()));
-						}
-						else
-						{
-							let command = inputValues[1];
-							let commandFunction = this.commands.get(command);
-							let argumentsString = (inputValues[2] ?? "").trim();
-							for (let [varName, varValue] of this.variables.entries())
-							{
-								argumentsString = argumentsString.replace(new RegExp("\\$\\" + varName + "\\b", "gi"), varValue);
-							}
-							let commandArguments = [];
-							for (let argMatch of argumentsString.matchAll(/"([^"]*)"|'([^']*)'|\S+/g))
-							{
-								commandArguments.push(argMatch[1] || argMatch[2] || argMatch[0]);
-							}
-							if (typeof commandFunction === "function")
-							{
-								try
-								{
-									let cmdResult = commandFunction(this, ...commandArguments);
-									if (cmdResult instanceof Promise)
-									{
-										async = true;
-										cmdResult.then(() => this.receiveInput(this.options.prompt, keyHandler));
-									}
-								}
-								catch (error)
-								{
-									console.error(error);
-								}
-							}
-							else
-							{
-								this.writeLn(`Unknown command: ${command}`);
-							}
-						}
 					}
-					if (async === false)
-					{
-						this.receiveInput(this.options.prompt, keyHandler);
-					}
+					this.eval(inputString.trim())
+						.finally(() =>
+						{
+							this.receiveInput(this.options.prompt, keyHandler);
+						});
 			}
 		};
 		this.options = Object.assign({
@@ -333,7 +281,124 @@ class CommandLineInterpreter
 		{
 			this.writeLn(options.motd);
 		}
-		this.receiveInput(this.options.prompt, keyHandler);
+		this.eval(options?.startup ?? "")
+			.then(() =>
+			{
+				this.receiveInput(this.options.prompt, keyHandler);
+			});
+	}
+
+	/**
+	 * Evaluate a string expression of commands or variable assignments.
+	 * Multiple commands/assignments are separated by semi-colon (`;`) or line break (`\n`).
+	 * @param {string} expr Expression to evaluate.
+	 * @returns A `Promise` that is fulfilled once all commands have been fully processed.
+	 */
+	eval (expr)
+	{
+		return /** @type {Promise<void>} */(new Promise((resolve) =>
+		{
+			const __handleError = (/** @type {Error} */ error) =>
+			{
+				this.writeLn(`\x1b[31m${error}`);
+				console.error(error);
+			};
+			const __eval = (/** @type {string} */ string) =>
+			{
+				return /** @type {Promise<void>} */(new Promise((__continue) =>
+				{
+					let immediateContinue = true;
+					let variableAssignment = /^\s*(\S+)\s*=(.*)/.exec(string);
+					if (variableAssignment)
+					{
+						if (/\W/.test(variableAssignment[1]))
+						{
+							this.writeLn(`Invalid token: ${/\W/.exec(variableAssignment[1])?.[0]}`);
+						}
+						else
+						{
+							let variableName = variableAssignment[1];
+							let variableValue = variableAssignment[2].trim();
+							if (!!variableValue)
+							{
+								this.variables.set(variableName, variableValue);
+							}
+							else
+							{
+								this.variables.delete(variableName);
+							}
+							this.memorize("variables", Object.fromEntries(this.variables.entries()));
+						}
+					}
+					else
+					{
+						let inputValues = /(\S+)(.*)/.exec(string);
+						if (!!inputValues)
+						{
+							let cmd = inputValues[1];
+							let commandFunction = this.commands.get(cmd);
+							if (typeof commandFunction === "function")
+							{
+								let args = [];
+								for (let argMatch of (inputValues[2] ?? "").matchAll(/"([^"]*)"|\S+/g))
+								{
+									args.push(argMatch[1] || argMatch[2] || argMatch[0]);
+								}
+								args = args.map((arg) =>
+								{
+									if (arg.startsWith("-") === false)
+									{
+										for (let [varName, varValue] of this.variables.entries())
+										{
+											arg = arg.replace(new RegExp("\\$" + varName + "\\b", "gi"), varValue);
+										}
+									}
+									return arg;
+								});
+								try
+								{
+									let cmdResult = commandFunction(this, ...args);
+									if (cmdResult instanceof Promise)
+									{
+										immediateContinue = false;
+										cmdResult
+											.catch(__handleError)
+											.finally(__continue);
+									}
+								}
+								catch (error)
+								{
+									__handleError(error);
+								}
+							}
+							else
+							{
+								this.writeLn(`Unknown command: ${cmd}`);
+							}
+						}
+					}
+					if (immediateContinue)
+					{
+						__continue();
+					}
+				}));
+			};
+			const __loop = () =>
+			{
+				let chunk = chunks.shift();
+				if (!!chunk)
+				{
+					__eval(chunk)
+						.finally(__loop);
+				}
+				else
+				{
+					resolve();
+				}
+			};
+			let chunks = expr.split(/\s*[;\n]+\s*/).filter((s) => !!s.trim());
+			__loop();
+		}));
 	}
 
 	/**
