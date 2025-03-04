@@ -345,15 +345,15 @@ class CommandLineInterpreter
 								let args = [];
 								for (let argMatch of (inputValues[2] ?? "").matchAll(/"([^"]*)"|\S+/g))
 								{
-									args.push(argMatch[1] || argMatch[2] || argMatch[0]);
+									args.push(argMatch[1] || argMatch[0]);
 								}
 								args = args.map((arg) =>
 								{
 									if (arg.startsWith("-") === false)
 									{
-										for (let [varName, varValue] of this.variables.entries())
+										for (let varMatch of arg.matchAll(/\$(\w+)/g))
 										{
-											arg = arg.replace(new RegExp("\\$" + varName + "\\b", "gi"), varValue);
+											arg = arg.replace(varMatch[0], this.variables.get(varMatch[1]) ?? varMatch[0]);
 										}
 									}
 									return arg;
