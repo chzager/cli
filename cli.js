@@ -205,6 +205,9 @@ class CommandLineInterpreter
 						inputEle.innerText = (historyPosition === this.history.length) ? "" : this.history[historyPosition];
 					};
 					break;
+				case "Escape":
+					inputEle.innerText = "";
+					break;
 				case "Enter":
 					let inputString = inputEle.innerText;
 					inputEle.replaceWith(CommandLineInterpreter.createElement("span", inputString + "\n"));
