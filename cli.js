@@ -513,60 +513,47 @@ class CommandLineInterpreter
 		};
 		const __format = (/** @type {string} */ text) =>
 		{
-			let tags = /\*|_|`|https?:\/\//;
+			/** @type {Array<string|HTMLElement>} */
 			let chunks = [];
-			let tag = tags.exec(text);
-			let safeCounter = 0;
-			while (!!tag)
+			let tokens = /((\*{1,2}|_{1,2}|`)([^\*\s].*?)\2)|((http)s?:\/\/\S+\b)/g;
+			for (let match of text.matchAll(tokens))
 			{
-				let fmtChar = tag[0];
-				if (["*", "_", "`"].includes(fmtChar))
+				/** @type {string} */
+				let tag;
+				/** @type {Array<string|HTMLElement>} */
+				let innerNodes;
+				let token = match[2] ?? match[5];
+				let content = match[3] ?? match[4];
+				let index = text.indexOf(content);
+				if (token === "http")
 				{
-					let tagRex = new RegExp("(^|\\s)\\" + fmtChar + "([^\\" + fmtChar + "\\s](.*?[^\\" + fmtChar + "\\s])*?)\\" + fmtChar + "(\\W|$)");
-					let htmlTag = "span";
-					switch (fmtChar)
+					tag = `a[href="${content}"][target="_blank"]`;
+					innerNodes = [content];
+				}
+				else
+				{
+					switch (token)
 					{
-						case "*":
-							htmlTag = "em";
+						case "**":
+						case "__":
+							tag = "b";
+							innerNodes = __format(content);
 							break;
+						case "*":
 						case "_":
-							htmlTag = "i";
+							tag = "i";
+							innerNodes = __format(content);
 							break;
 						case "`":
-							htmlTag = "code";
+							tag = "code";
+							innerNodes = [content];
 							break;
 					}
-					let tagContent = tagRex.exec(text);
-					if (!!tagContent)
-					{
-						let tagIndex = text.indexOf(tagContent[2]);
-						chunks.push(text.substring(0, tagIndex - 1));
-						chunks.push(CommandLineInterpreter.createElement(htmlTag, tagContent[2]));
-						text = text.substring(tagIndex + tagContent[2].length + 1);
-					}
-					else
-					{
-						chunks.push(text.substring(0, tag.index + 1));
-						text = text.substring(tag.index + 1);
-					}
+					index -= token.length;
+					content += token.repeat(2);
 				}
-				else if (tag[0].startsWith("http"))
-				{
-					let url = /https?:\/\/(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])/i.exec(text);
-					if (!!url)
-					{
-						let tagIndex = text.indexOf(url[0]);
-						chunks.push(text.substring(0, tagIndex));
-						chunks.push(CommandLineInterpreter.createElement(`a[href="${url[0]}"][target="_blank"]`, url[0]));
-						text = text.substring(tagIndex + url[0].length);
-					}
-				}
-				tag = tags.exec(text);
-				safeCounter += 1;
-				if (safeCounter > 1e4)
-				{
-					tag = null;
-				}
+				chunks.push(text.substring(0, index), CommandLineInterpreter.createElement(tag, ...innerNodes));
+				text = text.substring(index + content.length);
 			}
 			chunks.push(text);
 			return chunks;
@@ -714,18 +701,7 @@ class CommandLineInterpreter
 		{
 			element.classList.add(cssClass[1]);
 		}
-		// Add children:
-		for (let child of children)
-		{
-			if (child instanceof HTMLElement)
-			{
-				element.appendChild(child);
-			}
-			else
-			{
-				element.innerText = child;
-			}
-		}
+		element.append(...children);
 		return element;
 	};
 }

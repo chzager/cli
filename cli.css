@@ -31,7 +31,7 @@
 	text-decoration: underline;
 	cursor: pointer;
 }
-#CommandLineInterpreter em {
+#CommandLineInterpreter b {
 	font-weight: 600;
 	font-style: normal;
 }
