@@ -259,7 +259,7 @@ class CommandLineInterpreter
 				"margin: 0;",
 				"border: none;",
 				"outline: none;",
-				"white-space: pre-wrap;"].join("")}}`
+				"white-space: inherit;"].join("")}}`
 		));
 		// @ts-ignore missing deprecated property 'align'.
 		this.body = CommandLineInterpreter.createElement("div");
@@ -452,80 +452,57 @@ class CommandLineInterpreter
 	 */
 	write (text)
 	{
-		const __colorize = (/** @type {string} */ text) =>
-		{
-			let colorRex = /\x1b\[((3[0-7]|0)m)/g;
-			let colorTags = Array.from(text.matchAll(colorRex)).map((m) => Object.assign({ colorKey: m[2], index: m.index }));
-			if (colorTags.length > 0)
-			{
-				let chunks = [];
-				if (colorTags[0].index > 0)
-				{
-					colorTags.unshift({ colorKey: "0", index: 0 });
-				}
-				colorTags.map((t, i) => Object.assign(t, { length: colorTags[i + 1]?.index ?? text.length }));
-				for (let colorTag of colorTags)
-				{
-					let subText = text.substring(colorTag.index, colorTag.length).replace(colorRex, "");
-					if (colorTag.colorKey === "0")
-					{
-						chunks.push(...__format(subText));
-					}
-					else
-					{
-						let color = "--cli-color-foreground";
-						switch (colorTag.colorKey)
-						{
-							case "30":
-								color = "--cli-color-black";
-								break;
-							case "31":
-								color = "--cli-color-red";
-								break;
-							case "32":
-								color = "--cli-color-green";
-								break;
-							case "33":
-								color = "--cli-color-yellow";
-								break;
-							case "34":
-								color = "--cli-color-blue";
-								break;
-							case "35":
-								color = "--cli-color-magenta";
-								break;
-							case "36":
-								color = "--cli-color-cyan";
-								break;
-							case "37":
-								color = "--cli-color-white";
-								break;
-						}
-						chunks.push(CommandLineInterpreter.createElement(`span[style="color:var(${color}"]`, ...__format(subText)));
-					}
-				}
-				return chunks;
-			}
-			else
-			{
-				return __format(text);
-			}
-		};
 		const __format = (/** @type {string} */ text) =>
 		{
 			/** @type {Array<string|HTMLElement>} */
 			let chunks = [];
-			let tokens = /((\*{1,2}|_{1,2}|`)([^\*\s].*?)\2)|((http)s?:\/\/\S+\b)/g;
+			let tokens = /((\*{1,2}|_{1,2}|`)([^\*\s].*?)\2)|((http)s?:\/\/\S+\b)|((\x1b\[)(3[0-7]|0)m(.+))/g;
 			for (let match of text.matchAll(tokens))
 			{
 				/** @type {string} */
 				let tag;
 				/** @type {Array<string|HTMLElement>} */
 				let innerNodes;
-				let token = match[2] ?? match[5];
-				let content = match[3] ?? match[4];
+				let token = match[2] ?? match[5] ?? match[7]; // format-tag OR "http" OR color tag
+				let content = match[3] ?? match[4] ?? match[9];
 				let index = text.indexOf(content);
-				if (token === "http")
+				if (token === "\x1b[")
+				{
+					let color = "--cli-color-foreground";
+					switch (match[8])
+					{
+						case "30":
+							color = "--cli-color-black";
+							break;
+						case "31":
+							color = "--cli-color-red";
+							break;
+						case "32":
+							color = "--cli-color-green";
+							break;
+						case "33":
+							color = "--cli-color-yellow";
+							break;
+						case "34":
+							color = "--cli-color-blue";
+							break;
+						case "35":
+							color = "--cli-color-magenta";
+							break;
+						case "36":
+							color = "--cli-color-cyan";
+							break;
+						case "37":
+							color = "--cli-color-white";
+							break;
+					}
+					tag = `span[style="color:var(${color}"]`;
+					innerNodes = __format(content);
+					let tagLength = match[8].length + 3;
+					index -= tagLength;
+					content += "\0".repeat(tagLength);
+				}
+				else if (token === "http")
 				{
 					tag = `a[href="${content}"][target="_blank"]`;
 					innerNodes = [content];
@@ -560,21 +537,11 @@ class CommandLineInterpreter
 		};
 		if (this.options.richText)
 		{
-			for (let chunk of __colorize(text))
-			{
-				if (chunk instanceof HTMLElement)
-				{
-					this.body.appendChild(chunk);
-				}
-				else if (!!chunk)
-				{
-					this.body.appendChild(CommandLineInterpreter.createElement("span", chunk));
-				}
-			}
+			this.body.append(...__format(text));
 		}
 		else
 		{
-			this.body.appendChild(CommandLineInterpreter.createElement("span", text.replace(/\x1b\[\d+m/g, "")));
+			this.body.append(text.replace(/\x1b\[\d+m/g, ""));
 		}
 		this.body.scrollTo(0, this.body.scrollHeight);
 		return this;

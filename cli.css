@@ -16,7 +16,6 @@
 	border-right-width: 0;
 	color: var(--cli-color-foreground);
 	font-family: "Roboto Mono", monospace;
-	font-size: 14px;
 	font-weight: 400;
 	line-height: 1.4em;
 	margin: 0;
@@ -25,6 +24,7 @@
 	overflow-y: scroll;
 	box-sizing: border-box;
 	cursor: text;
+	white-space: pre-wrap;
 }
 #CommandLineInterpreter a:hover {
 	color: var(--cli-color-white);
