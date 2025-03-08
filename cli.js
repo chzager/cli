@@ -144,8 +144,16 @@ class CommandLineInterpreter
 	commands;
 
 	/**
+	 * String to be used as command prompt.
+	 * @type {string}
+	 */
+	prompt;
+
+	/**
 	 * Options of this CLI.
 	 * @type {CommandLineInterpreter_Options}
+	 * @typedef CommandLineInterpreter_Options
+	 * @property {boolean} richtextEnabled Enable or disable formatting the output text on the CLI.
 	 */
 	options;
 
@@ -219,14 +227,14 @@ class CommandLineInterpreter
 					this.eval(inputString.trim())
 						.finally(() =>
 						{
-							this.receiveInput(this.options.prompt, keyHandler);
+							this.receiveInput(this.prompt, keyHandler);
 						});
 			}
 		};
-		this.options = Object.assign({
-			prompt: "\nCLI> ",
-			richText: true
-		}, options);
+		this.prompt = options.prompt || "\nCLI> ";
+		this.options = {
+			richtextEnabled: options.richtextEnabled ?? true
+		};
 		this.id = options?.id || this.constructor.name;
 		this.history = [];
 		this.variables = new Map();
@@ -287,7 +295,7 @@ class CommandLineInterpreter
 		this.eval(options?.startup ?? "")
 			.then(() =>
 			{
-				this.receiveInput(this.options.prompt, keyHandler);
+				this.receiveInput(this.prompt, keyHandler);
 			});
 	}
 
@@ -535,7 +543,7 @@ class CommandLineInterpreter
 			chunks.push(text);
 			return chunks;
 		};
-		if (this.options.richText)
+		if (this.options.richtextEnabled)
 		{
 			this.body.append(...__format(text));
 		}
