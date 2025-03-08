@@ -474,8 +474,9 @@ class CommandLineInterpreter
 				let token = match[2] ?? match[5] ?? match[7]; // format-tag OR "http" OR color tag
 				let content = match[3] ?? match[4] ?? match[9];
 				let index = text.indexOf(content);
+				let contentLength = content.length;
 				if (token === "\x1b[")
-				{
+				{ // BUG: If the color-tag is at the end of the string, the tag is printed.
 					let color = "--cli-color-foreground";
 					switch (match[8])
 					{
@@ -508,7 +509,7 @@ class CommandLineInterpreter
 					innerNodes = __format(content);
 					let tagLength = match[8].length + 3;
 					index -= tagLength;
-					content += "\0".repeat(tagLength);
+					contentLength += tagLength;
 				}
 				else if (token === "http")
 				{
@@ -535,10 +536,10 @@ class CommandLineInterpreter
 							break;
 					}
 					index -= token.length;
-					content += token.repeat(2);
+					contentLength += (token.length * 2);
 				}
 				chunks.push(text.substring(0, index), CommandLineInterpreter.createElement(tag, ...innerNodes));
-				text = text.substring(index + content.length);
+				text = text.substring(index + contentLength);
 			}
 			chunks.push(text);
 			return chunks;
