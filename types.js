@@ -9,6 +9,7 @@
  * @property {string} [startup] Commands or variable assignments to be executed at startup (after the
  *  MOTD is printed but before the first input prompt). Multiple commands/assignments are separated
  *  by semi-colon (`;`) or line break (`\n`).
+ * @property {number} [tabWidth] Minimum whitespaces between tab-separated (`\t`) values in output. Default is `2`.
  *
  * @callback CommandLineInterpreter_CommandCallback
  * Callback type for functions ("commands") of the `CommandLineInterpreter`.

@@ -41,10 +41,10 @@ class CommandLineInterpreter
 					break;
 				case undefined:
 					cli.writeLn("These are the available commands:");
-					for (let command of Array.from(cli.commands.keys()).sort())
-					{
-						cli.writeLn(`  ${command}`);
-					}
+					cli.writeLn(Array.from(cli.commands.keys())
+						.sort()
+						.map((s) => `\t${s}`).join("\n")
+					);
 					cli.writeLn("\nType `<command> --?` for help on a specific command.");
 					break;
 				default:
@@ -60,8 +60,10 @@ class CommandLineInterpreter
 					cli.writeLn("Usage: history [option]")
 						.writeLn("Display or manipulate the list of all that has been entered.")
 						.writeLn("Optional arguments to manipulate the history:")
-						.writeLn("    --clean  Remove duplicate entries and invalid commands")
-						.writeLn("    --clear  Clear the entire history");
+						.writeLn([
+							"  \t--clean\tRemove duplicate entries and invalid commands",
+							"  \t--clear\tClean the entire history"
+						].join("\n"));
 					break;
 				case "--clear":
 					cli.history = [];
@@ -154,6 +156,7 @@ class CommandLineInterpreter
 	 * @type {CommandLineInterpreter_Options}
 	 * @typedef CommandLineInterpreter_Options
 	 * @property {boolean} richtextEnabled Enable or disable formatting the output text on the CLI.
+	 * @property {string} tabString Minimum whitespace string for tab-separated (`\t`) values in output. Default is two spaces.
 	 */
 	options;
 
@@ -233,7 +236,8 @@ class CommandLineInterpreter
 		};
 		this.prompt = options.prompt || "\nCLI> ";
 		this.options = {
-			richtextEnabled: options.richtextEnabled ?? true
+			richtextEnabled: options.richtextEnabled ?? true,
+			tabString: " ".repeat(options.tabWidth || 2)
 		};
 		this.id = options?.id || this.constructor.name;
 		this.history = [];
@@ -544,9 +548,36 @@ class CommandLineInterpreter
 			chunks.push(text);
 			return chunks;
 		};
+		const __tabularize = (/** @type {string} */ text) =>
+		{
+			return CommandLineInterpreter.createElement(`table`,
+				...text.split("\n").map((line) =>
+					CommandLineInterpreter.createElement("tr",
+						...line.split("\t").map((cell) =>
+						{
+							/** @type {HTMLTableCellElement} */
+							// @ts-ignore missing properties.
+							let td = CommandLineInterpreter.createElement("td", ...__format(cell + this.options.tabString));
+							if (/^[\-\+]?\d+(\.\d*)?\s*$/.test(td.innerText))
+							{
+								td.style = "text-align: right";
+							}
+							return td;
+						})
+					)
+				)
+			);
+		};
 		if (this.options.richtextEnabled)
 		{
-			this.body.append(...__format(text));
+			if (/\t/.test(text))
+			{
+				this.body.append(__tabularize(text.replace(/[\s\n]*$/g, "")));
+			}
+			else
+			{
+				this.body.append(...__format(text));
+			}
 		}
 		else
 		{
