@@ -221,7 +221,7 @@ class CommandLineInterpreter
 					break;
 				case "Enter":
 					let inputString = inputEle.innerText;
-					inputEle.replaceWith(CommandLineInterpreter.createElement("span", inputString + "\n"));
+					inputEle.replaceWith(CommandLineInterpreter.createElement("span.input", inputString + "\n"));
 					if (/\w/.test(inputString))
 					{
 						historyPosition = (this.history[this.history.length - 1] !== inputString) ? this.history.push(inputString.trim()) : this.history.length;
@@ -280,7 +280,7 @@ class CommandLineInterpreter
 		{
 			if (window.getSelection()?.toString() === "")
 			{
-				let inputEle = this.body.querySelector(".input");
+				let inputEle = this.body.querySelector(`.input[contenteditable="true"]`);
 				if (inputEle instanceof HTMLElement)
 				{
 					inputEle.focus();
@@ -647,7 +647,7 @@ class CommandLineInterpreter
 							inputEle.innerText = "";
 							break;
 						case "Enter":
-							inputEle.replaceWith(CommandLineInterpreter.createElement("span", inputEle.innerText + "\n"));
+							inputEle.replaceWith(CommandLineInterpreter.createElement("span.input", inputEle.innerText + "\n"));
 							resolve(inputEle.innerText);
 					}
 				});

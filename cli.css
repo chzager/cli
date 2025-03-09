@@ -27,6 +27,9 @@
 	cursor: text;
 	white-space: pre-wrap;
 }
+#CommandLineInterpreter span.input {
+	word-break: break-all;
+}
 #CommandLineInterpreter a:hover {
 	color: var(--cli-color-white);
 	text-decoration: underline;
