@@ -307,7 +307,7 @@ class CommandLineInterpreter
 	 * Evaluate a string expression of commands or variable assignments.
 	 * Multiple commands/assignments are separated by semi-colon (`;`) or line break (`\n`).
 	 * @param {string} expr Expression to evaluate.
-	 * @returns A `Promise` that is fulfilled once all commands have been fully processed.
+	 * @returns A `Promise` that resolves once all commands have been fully processed.
 	 */
 	eval (expr)
 	{
