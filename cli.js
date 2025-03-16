@@ -240,6 +240,10 @@ class CommandLineInterpreter
 			tabString: " ".repeat(options.tabWidth || 2)
 		};
 		this.id = options?.id || this.constructor.name;
+		if (options.theme !== "custom")
+		{
+			document.head.append(CommandLineInterpreter.createElement(`link[rel="stylesheet"][href="https://chzager.github.io/cli/themes/${options.theme ?? "default"}.css"]`));
+		}
 		this.history = [];
 		this.variables = new Map();
 		if (localStorage)

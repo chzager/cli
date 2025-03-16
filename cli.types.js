@@ -10,6 +10,8 @@
  *  MOTD is printed but before the first input prompt). Multiple commands/assignments are separated
  *  by semi-colon (`;`) or line break (`\n`).
  * @property {number} [tabWidth] Minimum whitespaces between tab-separated (`\t`) values in output. Default is `2`.
+ * @property {"default"|"light"|"white"|"custom"} [theme] The theme applied to the CLI instance. To use a custom
+ *  theme, select "custom". Please note that you must manually add your custom theme's CSS file to the document.
  *
  * @callback CommandLineInterpreter_CommandCallback
  * Callback type for functions ("commands") of the `CommandLineInterpreter`.

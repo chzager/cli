@@ -110,6 +110,28 @@ const cmds = {
 			default:
 				cli.writeLn(`tryout: Invalid argument: ${args[0]}`);
 		}
+	},
+	"theme": (cli, ...args) =>
+	{
+		const THEMES = ["default", "light", "white"];
+		switch (args?.[0])
+		{
+			case undefined:
+			case "--?":
+				cli.writeLn("Usage: theme <theme>")
+					.writeLn("Take a look at Command Line Interpreter in these predefined themes:")
+					.writeLn(THEMES.map((s) => "\t\t" + s).join("\n"));
+				break;
+			default:
+				if (THEMES.includes(args[0]))
+				{
+					window.location = `${window.location.pathname}?theme=${args[0]}`;
+				}
+				else
+				{
+					cli.writeLn(`theme: Invalid argument: ${args[0]}`);
+				}
+		}
 	}
 };
 
@@ -119,7 +141,8 @@ const cmds = {
 const opts = {
 	motd: "Welcome to _Command Line Interpreter!_\n" +
 		"https://github.com/chzager/cli\n" +
-		"Type `help` for a list of available commands."
+		"Type `help` for a list of available commands.",
+	theme: /\btheme=(\w+)/.exec(window.location.search)?.[1]
 };
 
 // Create a new instance of CommandLineInterpreter
