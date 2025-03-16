@@ -1,0 +1,51 @@
+#CommandLineInterpreter {
+	--cli-color-background: #fff;
+	--cli-color-foreground: #000;
+	--cli-color-black: #000;
+	--cli-color-red: #cc3131;
+	--cli-color-green: #107c10;
+	--cli-color-yellow: #939800;
+	--cli-color-blue: #0452a5;
+	--cli-color-magenta: #bc05bc;
+	--cli-color-cyan: #0597bc;
+	--cli-color-white: #000;
+	background-color: var(--cli-color-background);
+	color: var(--cli-color-foreground);
+	font-family: monospace;
+	font-weight: 400;
+	line-height: 1.4em;
+	margin: 0;
+	padding: 0.75em;
+	height: 100%;
+	max-height: 100%;
+	overflow-y: scroll;
+	white-space: pre-wrap;
+	box-sizing: border-box;
+	cursor: text;
+}
+#CommandLineInterpreter span.input {
+	word-break: break-all;
+}
+#CommandLineInterpreter a {
+	text-decoration: underline;
+	cursor: pointer;
+}
+#CommandLineInterpreter a:hover {
+	color: #00f;
+}
+#CommandLineInterpreter b {
+	font-weight: 600;
+	font-style: normal;
+}
+#CommandLineInterpreter code {
+	background-color: #ededed;
+	border-radius: 0.3em;
+	padding: 0 0.2em;
+	margin: 0 -0.2em;
+	border: 1px solid #ccc;
+	color: #555;
+}
+#CommandLineInterpreter table {
+	border-spacing: 0;
+	border-collapse: collapse;
+}
