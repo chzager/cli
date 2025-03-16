@@ -12,6 +12,7 @@
  * @property {number} [tabWidth] Minimum whitespaces between tab-separated (`\t`) values in output. Default is `2`.
  * @property {"default"|"light"|"white"|"custom"} [theme] The theme applied to the CLI instance. To use a custom
  *  theme, select "custom". Please note that you must manually add your custom theme's CSS file to the document.
+ * @property {string} [padding] The padding of the CLI element as CSS length. Default is `0.75em`.
  *
  * @callback CommandLineInterpreter_CommandCallback
  * Callback type for functions ("commands") of the `CommandLineInterpreter`.

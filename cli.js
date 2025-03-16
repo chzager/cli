@@ -242,7 +242,7 @@ class CommandLineInterpreter
 		this.id = options?.id || this.constructor.name;
 		if (options.theme !== "custom")
 		{
-			document.head.append(CommandLineInterpreter.createElement(`link[rel="stylesheet"][href="https://chzager.github.io/cli/themes/${options.theme ?? "default"}.css"]`));
+			document.head.append(CommandLineInterpreter.createElement(`link[rel="stylesheet"][href="https://chzager.github.io/cli/themes/${options.theme || "default"}.css"]`));
 		}
 		this.history = [];
 		this.variables = new Map();
@@ -291,6 +291,7 @@ class CommandLineInterpreter
 				}
 			}
 		};
+		this.body.style.padding = options.padding || "0.75em";
 		if (!(target instanceof HTMLElement))
 		{
 			target = document.body;
