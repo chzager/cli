@@ -113,7 +113,7 @@ const cmds = {
 	},
 	"theme": (cli, ...args) =>
 	{
-		const THEMES = ["default", "light", "white"];
+		const THEMES = ["default", "light", "white", "ubuntu"];
 		switch (args?.[0])
 		{
 			case undefined:
