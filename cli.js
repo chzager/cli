@@ -242,7 +242,7 @@ class CommandLineInterpreter
 		this.id = options?.id || this.constructor.name;
 		if (options.theme !== "custom")
 		{
-			document.head.append(CommandLineInterpreter.createElement(`link[rel="stylesheet"][href="https://chzager.github.io/cli/themes/${options.theme || "default"}.css"]`));
+			document.head.append(CommandLineInterpreter.createElement(`link[rel="stylesheet"][href="https://cdn.jsdelivr.net/gh/chzager/cli/themes/${options.theme || "default"}.css"]`));
 		}
 		this.history = [];
 		this.variables = new Map();
