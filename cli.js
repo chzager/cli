@@ -143,7 +143,7 @@ class CommandLineInterpreter
 
 	/**
 	 * Available commands in this CLI.
-	 * @type {Map<string, Function>}
+	 * @type {Map<string, CommandLineInterpreter_CommandCallback>}
 	 */
 	commands;
 
