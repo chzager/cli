@@ -1,9 +1,7 @@
 // @ts-check
 /**
  * Command Line Interpreter.
- *
- * https://github.com/chzager/cli
- *
+ * @link https://github.com/chzager/cli
  * @copyright (c) 2025 Christoph Zager
  * @license MIT
  */

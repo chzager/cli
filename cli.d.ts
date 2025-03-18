@@ -1,0 +1,168 @@
+/**
+ * Command Line Interpreter.
+ * @link https://github.com/chzager/cli
+ * @copyright (c) 2025 Christoph Zager
+ * @license MIT
+ */
+interface CommandLineInterpreter {
+	/**
+	 * ID of the current CLI instance. This is used for appliance of CSS styles and storing
+	 * data in the browser's local storage.
+	 */
+	id: string;
+
+	/** This CLI's HTML element. */
+	body: HTMLDivElement;
+
+	/** Available commands in this CLI. */
+	commands: Map<string, CommandLineInterpreter_CommandCallback>;
+
+	/** String to be used as command prompt. */
+	prompt: string;
+
+	/** Options of this CLI. */
+	options: {
+		/** Enable or disable formatting the output text on the CLI. */
+		richtextEnabled: boolean;
+		/**
+		 * Minimum whitespace string for tab-separated (`\t`) values in output. Default is two
+		 * spaces.
+		 */
+		tabString: string;
+	};
+
+	/** The input history. This is also stored in the `localStorage`. */
+	history: string[];
+	// history: Array<string> & { position?: number };
+
+	/** Variables that are defined with a value in this CLI. */
+	variables: Map<string, string>;
+
+	/**
+	 * Evaluate a string expression of commands or variable assignments. Multiple
+	 * commands/assignments are separated by semi-colon (`;`) or line break (`\n`).
+	 * @param expr Expression to evaluate.
+	 * @returns A `Promise` that resolves once all commands have been fully processed.
+	 */
+	eval(expr: string): Promise<void>;
+
+	/**
+	 * Stores data in the browser's `localStorage`.
+	 * @param key Key (identifier) of the data to be stored.
+	 * @param data Data to be stored.
+	 */
+	memorize(key: string, data: any): void;
+
+	/**
+	 * Writes the given text to the CLI on screen. Usually you should rather use
+	 * {@linkcode writeLn()} which adds a new line at the end of the text.
+	 * @param text Text to be written.
+	 */
+	write(text: string): CommandLineInterpreter;
+
+	/**
+	 * Just like {@linkcode write()}, but adds a new line at the end of the text. You should
+	 * prefer this over `write()`.
+	 * @param text Text to be written.
+	 */
+	writeLn(text: string): CommandLineInterpreter;
+
+	/**
+	 * Internal generic user input receiver.
+	 *
+	 * You should use either {@linkcode readLn()} or {@linkcode readKey()}.
+	 * @param prompt The prompt to be printed before the input.
+	 * @param keyHandler Event handler for keyboard events.
+	 * @protected
+	 */
+	receiveInput(prompt?: string, keyHandler?: (ev: KeyboardEvent) => any): void;
+
+	/**
+	 * Require the user to press a single key.
+	 * @param keys Set of acceptable keys. This may include special keys such as "Enter" or
+	 * "Escape". See [MDN reference](https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values).
+	 * @param prompt The prompt to be printed before the input.
+	 * @returns A `Promise` that resolves to the pressed key. Does not resolve for keys
+	 * outside the defined set.
+	 */
+	readKey(keys: string[], prompt?: string): void;
+
+	/**
+	 * Read any user input from the CLI. The user must commit his input with [Enter].
+	 * @param prompt The prompt to be printed before the input. Default is `"> "`.
+	 * @returns A `Promise` that resolves to the entered text.
+	 */
+	readLn(prompt?: string): string;
+
+	/**
+	 * Read any user input from the CLI but does not show the input on screen. The user must
+	 * commit his input with [Enter].
+	 * @param prompt The prompt to be printed before the input. Default is `"> "`.
+	 * @returns A `Promise` that resolves to the entered secret as a plain string.
+	 */
+	readSecret(prompt?: string): string;
+}
+declare var CommandLineInterpreter: {
+	/**
+	 * @param commands Custom commands to be available in this CLI.
+	 * @param target HTML element on the document where the CLI element shall be displayed.
+	 * @param options Options for this CLI.
+	 */
+	new (commands: Record<string, CommandLineInterpreter_InitOptions>, target?: HTMLElement, options?: CommandLineInterpreter_InitOptions): CommandLineInterpreter;
+
+	/**
+	 * Create a new HTML elemement.
+	 * @param tag The tag of the desired HTML element. This may include css classes and attributes.
+	 * @param children Content (or child elements) to be created on/in the HTML element.
+	 * @returns The newly created HTML element.
+	 */
+	createElement(tag: string, ...children: (string | HTMLElement)[]): HTMLElement;
+	readonly prototype: CommandLineInterpreter;
+};
+
+/** Initialization options for the `CommandLineInterpreter`. */
+interface CommandLineInterpreter_InitOptions {
+	/** If your web page uses more than one CLI, you may specify unique IDs here. */
+	id?: string;
+
+	/** "Message of the day". This text is printed when the CLI is initialized. */
+	motd?: string;
+
+	/**
+	 * String to be used as the prompt. Default is `"\nCLI> "` which includes a new line
+	 * before the prompt.
+	 */
+	prompt?: string;
+
+	/** Enable or disable formatting the text on the CLI. Default is `true`. */
+	richtextEnabled?: boolean;
+
+	/**
+	 * Commands or variable assignments to be executed at startup (after the MOTD is printed
+	 * but before the first input prompt). Multiple commands/assignments are separated by
+	 * semi-colon (`;`) or line break (`\n`).
+	 */
+	startup?: string;
+
+	/** Minimum whitespaces between tab-separated (`\t`) values in output. Default is `2`. */
+	tabWidth?: number;
+
+	/**
+	 * The theme applied to the CLI instance. To use a custom theme, select "custom". Please
+	 * note that you must manually add your custom theme's CSS file to the document.
+	 */
+	theme?: "default" | "light" | "white" | "ubuntu" | "custom";
+
+	/** The padding of the CLI element as CSS length. Default is `0.75em`. */
+	padding?: string;
+}
+
+/** Callback type for functions ("commands") of the `CommandLineInterpreter`. */
+interface CommandLineInterpreter_CommandCallback {
+	/**
+	 * @param cli The calling `CommandLineInterpreter`.
+	 * @param args Arguments given by the user in the command line.
+	 * @returns void or a Promise resolving to void.
+	 */
+	(cli: CommandLineInterpreter, ...args: string[]): void | Promise<void>;
+}
