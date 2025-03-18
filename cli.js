@@ -67,6 +67,7 @@ class CommandLineInterpreter
 					break;
 				case "--clear":
 					cli.history = [];
+					cli.history.position = -1;
 					cli.memorize("history", cli.history);
 					break;
 				case "--clean":
@@ -77,6 +78,7 @@ class CommandLineInterpreter
 						let command = /^\S+/.exec(s)?.[0] ?? "";
 						return validCommands.includes(command);
 					});
+					cli.history.position = cli.history.length;
 					cli.memorize("history", cli.history);
 					cli.writeLn("** The history has been cleaned. **");
 					break;
