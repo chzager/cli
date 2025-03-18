@@ -193,7 +193,7 @@ class CommandLineInterpreter
 					this.body.scrollBy(0, (this.body.clientHeight - 10));
 					break;
 				case "ArrowUp":
-					if ((this.history.position > 0) && (this.history.length > 0))
+					if ((this.history.position) && (this.history.position > 0) && (this.history.length > 0))
 					{
 						this.history.position -= 1;
 						inputEle.innerText = this.history[this.history.position];
@@ -212,7 +212,7 @@ class CommandLineInterpreter
 					};
 					break;
 				case "ArrowDown":
-					if (this.history.position < this.history.length)
+					if ((this.history.position) && (this.history.position < this.history.length))
 					{
 						this.history.position += 1;
 						inputEle.innerText = (this.history.position === this.history.length) ? "" : this.history[this.history.position];
@@ -236,15 +236,15 @@ class CommandLineInterpreter
 						});
 			}
 		};
-		this.prompt = options.prompt || "\nCLI> ";
+		this.prompt = options?.prompt || "\nCLI> ";
 		this.options = {
-			richtextEnabled: options.richtextEnabled ?? true,
-			tabString: " ".repeat(options.tabWidth || 2)
+			richtextEnabled: options?.richtextEnabled ?? true,
+			tabString: " ".repeat(options?.tabWidth || 2)
 		};
 		this.id = options?.id || this.constructor.name;
-		if (options.theme !== "custom")
+		if (options?.theme !== "custom")
 		{
-			document.head.append(CommandLineInterpreter.createElement(`link[rel="stylesheet"][href="https://cdn.jsdelivr.net/gh/chzager/cli/themes/${options.theme || "default"}.css"]`));
+			document.head.append(CommandLineInterpreter.createElement(`link[rel="stylesheet"][href="https://cdn.jsdelivr.net/gh/chzager/cli/themes/${options?.theme || "default"}.css"]`));
 		}
 		this.history = [];
 		this.variables = new Map();
@@ -293,7 +293,7 @@ class CommandLineInterpreter
 				}
 			}
 		};
-		this.body.style.padding = options.padding || "0.75em";
+		this.body.style.padding = options?.padding || "0.75em";
 		if (!(target instanceof HTMLElement))
 		{
 			target = document.body;
@@ -479,9 +479,9 @@ class CommandLineInterpreter
 			for (let match of text.matchAll(tokens))
 			{
 				/** @type {string} */
-				let tag;
+				let tag = "span";
 				/** @type {Array<string|HTMLElement>} */
-				let innerNodes;
+				let innerNodes = [];
 				let token = match[2] ?? match[5] ?? match[7]; // format-tag OR "http" OR color tag
 				let content = match[3] ?? match[4] ?? match[9];
 				let index = text.indexOf(content);
@@ -663,7 +663,7 @@ class CommandLineInterpreter
 
 	/**
 	 * Read any user input from the CLI but does not show the input on screen.
-	 * The user must commit his input with _[Enter]_.
+	 * The user must commit his input with [Enter].
 	 * @param {string} [prompt] The prompt to be printed before the input. Default is `"> "`.
 	 * @returns {Promise<string>} A `Promise` that resolves to the entered secret as a plain string.
 	 */
