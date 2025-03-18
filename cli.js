@@ -162,7 +162,7 @@ class CommandLineInterpreter
 
 	/**
 	 * The input history. This is also stored in the `localStorage`.
-	 * @type {Array<string>}
+	 * @type {Array<string> & {position?: number}}
 	 */
 	history;
 
@@ -191,10 +191,10 @@ class CommandLineInterpreter
 					this.body.scrollBy(0, (this.body.clientHeight - 10));
 					break;
 				case "ArrowUp":
-					if ((historyPosition > 0) && (this.history.length > 0))
+					if ((this.history.position > 0) && (this.history.length > 0))
 					{
-						historyPosition -= 1;
-						inputEle.innerText = this.history[historyPosition];
+						this.history.position -= 1;
+						inputEle.innerText = this.history[this.history.position];
 						setTimeout(() =>
 						{
 							let range = document.createRange();
@@ -210,10 +210,10 @@ class CommandLineInterpreter
 					};
 					break;
 				case "ArrowDown":
-					if (historyPosition < this.history.length)
+					if (this.history.position < this.history.length)
 					{
-						historyPosition += 1;
-						inputEle.innerText = (historyPosition === this.history.length) ? "" : this.history[historyPosition];
+						this.history.position += 1;
+						inputEle.innerText = (this.history.position === this.history.length) ? "" : this.history[this.history.position];
 					};
 					break;
 				case "Escape":
@@ -224,7 +224,7 @@ class CommandLineInterpreter
 					inputEle.replaceWith(CommandLineInterpreter.createElement("span.input", inputString + "\n"));
 					if (/\w/.test(inputString))
 					{
-						historyPosition = (this.history[this.history.length - 1] !== inputString) ? this.history.push(inputString.trim()) : this.history.length;
+						this.history.position = (this.history[this.history.length - 1] !== inputString) ? this.history.push(inputString.trim()) : this.history.length;
 						this.memorize("history", this.history);
 					}
 					this.eval(inputString.trim())
@@ -252,7 +252,7 @@ class CommandLineInterpreter
 			this.history = storedData?.history ?? [];
 			Object.entries(storedData?.variables ?? {}).map(([n, v]) => this.variables.set(n, v));
 		};
-		let historyPosition = this.history.length;
+		this.history.position = this.history.length;
 		this.commands = new Map();
 		for (let commandProvider of [CommandLineInterpreter.builtInCommands, commands])
 		{
