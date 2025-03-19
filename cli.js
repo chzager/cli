@@ -242,7 +242,11 @@ class CommandLineInterpreter
 		this.id = options?.id || this.constructor.name;
 		if (options?.theme !== "custom")
 		{
-			document.head.append(CommandLineInterpreter.createElement(`link[rel="stylesheet"][href="https://cdn.jsdelivr.net/gh/chzager/cli/themes/${options?.theme || "default"}.css"]`));
+			let themeFileUrl = `link[rel="stylesheet"][href="https://cdn.jsdelivr.net/gh/chzager/cli/themes/${options?.theme || "default"}.css"]`;
+			if (!document.head.querySelector(themeFileUrl))
+			{
+				document.head.append(CommandLineInterpreter.createElement(themeFileUrl));
+			}
 		}
 		this.history = [];
 		this.variables = new Map();
@@ -264,19 +268,6 @@ class CommandLineInterpreter
 				}
 			}
 		}
-		document.head.appendChild(CommandLineInterpreter.createElement(
-			"style",
-			`#${this.constructor.name} * {${[
-				"background-color: transparent;",
-				"color: inherit;",
-				"font-family: inherit;",
-				"font-size: inherit;",
-				"padding: 0;",
-				"margin: 0;",
-				"border: none;",
-				"outline: none;",
-				"white-space: inherit;"].join("")}}`
-		));
 		// @ts-ignore missing deprecated property 'align'.
 		this.body = CommandLineInterpreter.createElement("div");
 		this.body.id = this.constructor.name;
@@ -708,7 +699,7 @@ class CommandLineInterpreter
 		{
 			element.setAttribute(attributeMatch[1], attributeMatch[2]);
 		}
-		// Add css classes:
+		// Add CSS classes:
 		for (let cssClass of tag.replaceAll(/\[.+\]/g, "").matchAll(/\.([^.[\s]+)/g))
 		{
 			element.classList.add(cssClass[1]);
@@ -717,3 +708,21 @@ class CommandLineInterpreter
 		return element;
 	};
 }
+
+// Create <style> element with mandatory CSS rules for CLI child elements:
+addEventListener("DOMContentLoaded", () =>
+{
+	document.head.appendChild(CommandLineInterpreter.createElement(
+		"style",
+		`#${CommandLineInterpreter.name} * {${[
+			"background-color: transparent;",
+			"color: inherit;",
+			"font-family: inherit;",
+			"font-size: inherit;",
+			"padding: 0;",
+			"margin: 0;",
+			"border: none;",
+			"outline: none;",
+			"white-space: inherit;"].join("")}}`
+	));
+});
