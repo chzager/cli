@@ -15,7 +15,8 @@
 	color: var(--cli-color-foreground);
 	font-family: "Ubuntu Mono", monospace;
 	font-weight: 400;
-	line-height: 1.4em;
+	font-size: 0.9479em;
+	line-height: 1.2em;
 	margin: 0;
 	height: 100%;
 	max-height: 100%;

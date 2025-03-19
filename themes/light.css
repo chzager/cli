@@ -13,6 +13,7 @@
 	color: var(--cli-color-foreground);
 	font-family: monospace;
 	font-weight: 400;
+	font-size: 1em;
 	line-height: 1.4em;
 	margin: 0;
 	height: 100%;
