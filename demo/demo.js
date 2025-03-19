@@ -1,6 +1,7 @@
 /**
  * These are the commands that are availible in the CLI.
- * @type {Record<string,CommandLineInterpreter_CommandCallback>} */
+ * @type {Record<string,CommandLineInterpreter_CommandCallback>}
+ */
 const cmds = {
 	"formatting": (cli, ...args) =>
 	{
@@ -114,6 +115,7 @@ const cmds = {
 	"theme": (cli, ...args) =>
 	{
 		const THEMES = ["default", "light", "white", "ubuntu"];
+		const THEME_URL_ROOT = "https://cdn.jsdelivr.net/gh/chzager/cli/themes/";
 		switch (args?.[0])
 		{
 			case undefined:
@@ -125,7 +127,11 @@ const cmds = {
 			default:
 				if (THEMES.includes(args[0]))
 				{
-					window.location = `${window.location.pathname}?theme=${args[0]}`;
+					for (let styleElement of document.head.querySelectorAll(`link[rel="stylesheet"][href^="${THEME_URL_ROOT}"]`))
+					{
+						styleElement.remove();
+					}
+					document.head.append(CommandLineInterpreter.createElement(`link[rel="stylesheet"][href="${THEME_URL_ROOT}${args[0]}.css"]`));
 				}
 				else
 				{
@@ -137,7 +143,8 @@ const cmds = {
 
 /**
  * Initialization options for the CLI.
- * @type {CommandLineInterpreter_InitOptions} */
+ * @type {CommandLineInterpreter_InitOptions}
+ */
 const opts = {
 	motd: "Welcome to _Command Line Interpreter!_\n" +
 		"https://github.com/chzager/cli\n" +
