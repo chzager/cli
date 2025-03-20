@@ -156,7 +156,7 @@ class CommandLineInterpreter
 	 * @type {CommandLineInterpreter_Options}
 	 * @typedef CommandLineInterpreter_Options
 	 * @property {boolean} richtextEnabled Enable or disable formatting the output text on the CLI.
-	 * @property {string} tabString Minimum whitespace string for tab-separated (`\t`) values in output. Default is two spaces.
+	 * @property {number} tabWidth Minimum whitespace string for tab-separated (`\t`) values in output. Default is two.
 	 */
 	options;
 
@@ -237,7 +237,7 @@ class CommandLineInterpreter
 		this.prompt = options?.prompt || "\nCLI> ";
 		this.options = {
 			richtextEnabled: options?.richtextEnabled ?? true,
-			tabString: " ".repeat(options?.tabWidth || 2)
+			tabWidth: options?.tabWidth || 2
 		};
 		this.id = options?.id || this.constructor.name;
 		if (options?.theme !== "custom")
@@ -545,29 +545,45 @@ class CommandLineInterpreter
 		};
 		const __tabularize = (/** @type {string} */ text) =>
 		{
-			return CommandLineInterpreter.createElement(`table`,
-				...text.split("\n").map((line) =>
-					CommandLineInterpreter.createElement("tr",
-						...line.split("\t").map((cell) =>
-						{
-							/** @type {HTMLTableCellElement} */
-							// @ts-ignore missing properties.
-							let td = CommandLineInterpreter.createElement("td", ...__format(cell + this.options.tabString));
-							if (/^[\-\+]?\d+(\.\d*)?\s*$/.test(td.innerText))
-							{
-								td.style = "text-align: right";
-							}
-							return td;
-						})
-					)
-				)
+			/** @type {Array<number>} */
+			let columnWidths = [];
+			let lines = text.split("\n").map((line) =>
+				line.split("\t").map((cell, colIndex) =>
+				{
+					let ele = CommandLineInterpreter.createElement("p", ...__format(cell));
+					columnWidths[colIndex] = Math.max(columnWidths[colIndex] || 0, ele.innerText.length);
+					return ele;
+				})
 			);
+			for (let line of lines)
+			{
+				let columnCount = line.length;
+				for (let columnIndex = 0; columnIndex < columnCount; columnIndex += 1)
+				{
+					let cell = line[columnIndex];
+					let cellText = cell.innerText;
+					let paddingSpaces = columnWidths[columnIndex] - cellText.length;
+					if (paddingSpaces > 0)
+					{
+						if (/^[\-\+]?\d+(\.\d*)?\s*$/.test(cellText))
+						{
+							cell.prepend(" ".repeat(paddingSpaces));
+						}
+						else if (columnIndex < columnCount - 1)
+						{
+							cell.append(" ".repeat(paddingSpaces));
+						}
+					}
+					cell.append((columnIndex < columnCount - 1) ? "\x20".repeat(this.options.tabWidth) : "\n");
+				}
+			}
+			return lines.map((l) => l.map((c) => Array.from(c.childNodes))).flat(2);
 		};
 		if (this.options.richtextEnabled)
 		{
 			if (/\t/.test(text))
 			{
-				this.body.append(__tabularize(text.replace(/[\s\n]*$/g, "")));
+				this.body.append(...__tabularize(text.replace(/[\s\n]*$/g, "")));
 			}
 			else
 			{

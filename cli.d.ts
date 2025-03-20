@@ -24,11 +24,8 @@ interface CommandLineInterpreter {
 	options: {
 		/** Enable or disable formatting the output text on the CLI. */
 		richtextEnabled: boolean;
-		/**
-		 * Minimum whitespace string for tab-separated (`\t`) values in output. Default is two
-		 * spaces.
-		 */
-		tabString: string;
+		/** Minimum whitespace string for tab-separated (`\t`) values in output. Default is two. */
+		tabWidth: number;
 	};
 
 	/** The input history. This is also stored in the `localStorage`. */
