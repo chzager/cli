@@ -12,9 +12,6 @@
 	background-color: var(--cli-color-background);
 	color: var(--cli-color-foreground);
 	font-family: monospace;
-	font-weight: 400;
-	font-size: 1em;
-	line-height: 1.4em;
 	margin: 0;
 	height: 100%;
 	max-height: 100%;
@@ -33,11 +30,8 @@
 #CommandLineInterpreter a:hover {
 	color: #00f;
 }
-#CommandLineInterpreter b {
-	font-weight: 600;
-	font-style: normal;
-}
 #CommandLineInterpreter code {
+	color: inherit;
 	background-color: #ededed;
 	border-radius: 0.3em;
 	padding: 0 0.2em;

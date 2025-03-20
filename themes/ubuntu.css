@@ -14,9 +14,6 @@
 	background-color: var(--cli-color-background);
 	color: var(--cli-color-foreground);
 	font-family: "Ubuntu Mono", monospace;
-	font-weight: 400;
-	font-size: 0.9479em;
-	line-height: 1.2em;
 	margin: 0;
 	height: 100%;
 	max-height: 100%;
@@ -34,10 +31,6 @@
 }
 #CommandLineInterpreter a:hover {
 	color: var(--cli-color-magenta);
-}
-#CommandLineInterpreter b {
-	font-weight: 600;
-	font-style: normal;
 }
 #CommandLineInterpreter code {
 	color: #d3d7cf;

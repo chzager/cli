@@ -282,7 +282,6 @@ class CommandLineInterpreter
 				}
 			}
 		};
-		this.body.style.padding = options?.padding || "0.75em";
 		if (!(target instanceof HTMLElement))
 		{
 			target = document.body;

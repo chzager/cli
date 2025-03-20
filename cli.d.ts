@@ -152,9 +152,6 @@ interface CommandLineInterpreter_InitOptions {
 	 * note that you must manually add your custom theme's CSS file to the document.
 	 */
 	theme?: "default" | "light" | "white" | "ubuntu" | "custom";
-
-	/** The padding of the CLI element as CSS length. Default is `0.75em`. */
-	padding?: string;
 }
 
 /** Callback type for functions ("commands") of the `CommandLineInterpreter`. */
