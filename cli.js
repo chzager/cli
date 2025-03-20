@@ -81,17 +81,7 @@ class CommandLineInterpreter
 					cli.writeLn("** The history has been cleaned. **");
 					break;
 				case undefined:
-					if (cli.history.length > 0)
-					{
-						for (let item of cli.history)
-						{
-							cli.writeLn(item);
-						}
-					}
-					else
-					{
-						cli.writeLn("** The history is empty. **");
-					}
+					cli.writeLn(cli.history.join("\n"));
 					break;
 				default:
 					cli.writeLn(`history: Invalid argument: ${args[0]}`);
