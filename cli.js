@@ -43,7 +43,7 @@ class CommandLineInterpreter
 						.sort()
 						.map((s) => `\t${s}`).join("\n")
 					);
-					cli.writeLn("\nType `<command> --?` for help on a specific command.");
+					cli.writeLn("\nTry `<command> --?` for more information on a specific command.");
 					break;
 				default:
 					cli.writeLn(`help: Invalid argument: ${args[0]}`);
