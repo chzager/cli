@@ -484,7 +484,7 @@ class CommandLineInterpreter
 
 	/**
 	 * Writes the given text to the CLI on screen. Usually you should rather
-	 *  use {@linkcode writeLn()} which adds a new line at the end of the text.
+	 * use {@linkcode writeLn()} which adds a new line at the end of the text.
 	 * @param {string} text Text to be written.
 	 */
 	write (text)
@@ -630,7 +630,7 @@ class CommandLineInterpreter
 
 	/**
 	 * Just like {@linkcode write()}, but adds a new line at the end of the text.
-	 *  You should prefer this over `write()`.
+	 * You should prefer this over `write()`.
 	 * @param {string} text Text to be written.
 	 */
 	writeLn (text)
@@ -640,11 +640,9 @@ class CommandLineInterpreter
 
 	/**
 	 * Require the user to press a single key.
-	 * @param {Array<string>} keys Set of acceptable keys. This may include special
-	 *  keys such as "Enter" or "Escape". See [MDN reference](https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values).
+	 * @param {Array<string>} keys Set of acceptable keys. This may include special keys such as "Enter" or "Escape". See [MDN reference](https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values).
 	 * @param {string} [prompt] The prompt to be printed before the input.
-	 * @returns {Promise<string>} A `Promise` that resolves to the pressed key.
-	 *  Does not resolve for keys outside the defined set.
+	 * @returns {Promise<string>} A `Promise` that resolves to the pressed key. Does not resolve for keys outside the defined set.
 	 */
 	readKey (keys, prompt)
 	{
