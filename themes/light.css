@@ -3,11 +3,11 @@
 	--cli-color-foreground: #228;
 	--cli-color-black: #333;
 	--cli-color-red: #f22;
-	--cli-color-green: #2a4;
+	--cli-color-green: #009a28;
 	--cli-color-yellow: #baab07;
 	--cli-color-blue: #46f;
 	--cli-color-magenta: #e4e;
-	--cli-color-cyan: #1cb7d0;
+	--cli-color-cyan: #32a7ba;
 	--cli-color-white: #9f9fc0;
 	background-color: var(--cli-color-background);
 	color: var(--cli-color-foreground);
