@@ -7,6 +7,7 @@
  */
 class CommandLineInterpreter
 {
+	// TODO: Paste from clipboard as plain text (https://stackoverflow.com/questions/58980235/)
 	/**
 	 * The basic built-in commands for every CLI.
 	 * @type {Record<string, CommandLineInterpreter_CommandCallback>}
@@ -233,6 +234,7 @@ class CommandLineInterpreter
 		if (options?.theme !== "custom")
 		{
 			let themeFileUrl = `link[rel="stylesheet"][href="https://cdn.jsdelivr.net/gh/chzager/cli/themes/${options?.theme || "default"}.css"]`;
+			// let themeFileUrl = `link[rel="stylesheet"][href="../themes/${options?.theme || "default"}.css"]`;
 			if (!document.head.querySelector(themeFileUrl))
 			{
 				document.head.append(CommandLineInterpreter.createElement(themeFileUrl));
@@ -441,6 +443,44 @@ class CommandLineInterpreter
 			localStorage.setItem(this.id, JSON.stringify(storedData));
 		}
 	};
+
+	/**
+	 * Checks if a named argument is present in the arguments.
+	 * @param {Array<string>} args Arguments.
+	 * @param {...string} name Name of the argument to be checked. Named arguments always begin with one or two hyphens.
+	 */
+	namedArgumentExists (args, ...name)
+	{
+		for (let n of name)
+		{
+			if (args.includes(n))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Retrieves the value of a named argument, which is the item following the named argument in the arguments list.
+	 * @param {Array<string>} args Arguments.
+	 * @param {...string} name Name of the argument whose value is to be retrieved. Named arguments always begin with one or two hyphens.
+	 * @returns {string | undefined} The named argument's value, or `undefined` if the named argument does not exists.
+	 */
+	getNamedArgumentValue (args, ...name)
+	{
+		for (let n of name)
+		{
+			let argIndex = args.indexOf(n);
+			if (argIndex > -1)
+			{
+				return ((args.length > argIndex + 1) && (/^--?/.test(args[argIndex + 1]) === false))
+					? args[argIndex + 1]
+					: "";
+			}
+		}
+		return undefined;
+	}
 
 	/**
 	 * Writes the given text to the CLI on screen. Usually you should rather

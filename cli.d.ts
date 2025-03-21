@@ -51,6 +51,22 @@ interface CommandLineInterpreter {
 	memorize(key: string, data: any): void;
 
 	/**
+	 * Checks if a named argument is present in the arguments.
+	 * @param args Arguments.
+	 * @param name Name of the argument to be checked. Named arguments always begin with one or two hyphens.
+	 */
+	namedArgumentExists(args: string[], ...name: string[]): boolean;
+
+	/**
+	 * Retrieves the value of a named argument, which is the item following the named argument
+	 * in the arguments list.
+	 * @param args Arguments.
+	 * @param name Name of the argument whose value is to be retrieved. Named arguments always begin with one or two hyphens.
+	 * @returns The named argument's value, or `undefined` if the named argument does not exists.
+	 */
+	getNamedArgumentValue(args: string[], ...name: string[]): string | undefined;
+
+	/**
 	 * Writes the given text to the CLI on screen. Usually you should rather use
 	 * {@linkcode writeLn()} which adds a new line at the end of the text.
 	 * @param text Text to be written.
@@ -76,11 +92,9 @@ interface CommandLineInterpreter {
 
 	/**
 	 * Require the user to press a single key.
-	 * @param keys Set of acceptable keys. This may include special keys such as "Enter" or
-	 * "Escape". See [MDN reference](https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values).
+	 * @param keys Set of acceptable keys. This may include special keys such as "Enter" or "Escape". See [MDN reference](https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values).
 	 * @param prompt The prompt to be printed before the input.
-	 * @returns A `Promise` that resolves to the pressed key. Does not resolve for keys
-	 * outside the defined set.
+	 * @returns A `Promise` that resolves to the pressed key. Does not resolve for keys outside the defined set.
 	 */
 	readKey(keys: string[], prompt?: string): void;
 
