@@ -493,7 +493,7 @@ class CommandLineInterpreter
 		{
 			/** @type {Array<string|HTMLElement>} */
 			let chunks = [];
-			let tokens = /((\*{1,2}|_{1,2}|`)([^\*\s].*?)\2)|((http)s?:\/\/\S+\b)|((\x1b\[)(3[0-7]|0)m(.+))/g;
+			let tokens = /((\*{1,2}|_{1,2}|`)([^\*\s].*?)\2)|((http)s?:\/\/\S+\b)|((\x1b\[)(3[0-7]|0)m(.*))/g;
 			for (let match of text.matchAll(tokens))
 			{
 				/** @type {string} */
@@ -505,40 +505,47 @@ class CommandLineInterpreter
 				let index = text.indexOf(content);
 				let contentLength = content.length;
 				if (token === "\x1b[")
-				{ // BUG: If the color-tag is at the end of the string, the tag is printed.
-					let color = "--cli-color-foreground";
-					switch (match[8])
-					{
-						case "30":
-							color = "--cli-color-black";
-							break;
-						case "31":
-							color = "--cli-color-red";
-							break;
-						case "32":
-							color = "--cli-color-green";
-							break;
-						case "33":
-							color = "--cli-color-yellow";
-							break;
-						case "34":
-							color = "--cli-color-blue";
-							break;
-						case "35":
-							color = "--cli-color-magenta";
-							break;
-						case "36":
-							color = "--cli-color-cyan";
-							break;
-						case "37":
-							color = "--cli-color-white";
-							break;
-					}
-					tag = `span[style="color:var(${color}"]`;
-					innerNodes = __format(content);
-					let tagLength = match[8].length + 3;
-					index -= tagLength;
+				{
+					let tagLength = match[8].length + 3; // 3 = "\xb1" + "[" + "m"
 					contentLength += tagLength;
+					if (!!content)
+					{
+						index -= tagLength;
+						let color = "--cli-color-foreground";
+						switch (match[8])
+						{
+							case "30":
+								color = "--cli-color-black";
+								break;
+							case "31":
+								color = "--cli-color-red";
+								break;
+							case "32":
+								color = "--cli-color-green";
+								break;
+							case "33":
+								color = "--cli-color-yellow";
+								break;
+							case "34":
+								color = "--cli-color-blue";
+								break;
+							case "35":
+								color = "--cli-color-magenta";
+								break;
+							case "36":
+								color = "--cli-color-cyan";
+								break;
+							case "37":
+								color = "--cli-color-white";
+								break;
+						}
+						tag = `span[style="color:var(${color}"]`;
+						innerNodes = __format(content);
+					}
+					else
+					{
+						index = text.indexOf(match[6]);
+					}
 				}
 				else if (token === "http")
 				{
