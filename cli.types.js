@@ -17,6 +17,6 @@
  * Callback type for functions ("commands") of the `CommandLineInterpreter`.
  * @param {CommandLineInterpreter} cli The calling `CommandLineInterpreter`.
  * @param {...string} args Arguments given by the user in the command line.
- * @returns {void|Promise<void>}
+ * @returns {any|Promise<any>} Any value or a `Promise` for asynchronous methods.
  *
  */

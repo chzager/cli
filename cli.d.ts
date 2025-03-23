@@ -115,7 +115,7 @@ declare var CommandLineInterpreter: {
 	 * @param target HTML element on the document where the CLI element shall be displayed.
 	 * @param options Options for this CLI.
 	 */
-	new (commands: Record<string, CommandLineInterpreterInitOptions>, target?: HTMLElement, options?: CommandLineInterpreterInitOptions): CommandLineInterpreter;
+	new (commands: Record<string, CommandLineInterpreterCommandCallback>, target?: HTMLElement, options?: CommandLineInterpreterInitOptions): CommandLineInterpreter;
 
 	/**
 	 * Create a new HTML elemement.
@@ -161,12 +161,10 @@ interface CommandLineInterpreterInitOptions {
 	theme?: "default" | "light" | "white" | "ubuntu" | "custom";
 }
 
-/** Callback type for functions ("commands") of the `CommandLineInterpreter`. */
-interface CommandLineInterpreterCommandCallback {
-	/**
-	 * @param cli The calling `CommandLineInterpreter`.
-	 * @param args Arguments given by the user in the command line.
-	 * @returns void or a Promise resolving to void.
-	 */
-	(cli: CommandLineInterpreter, ...args: string[]): void | Promise<void>;
-}
+/**
+ * Callback type for functions ("commands") of the `CommandLineInterpreter`.
+ * @param cli The calling `CommandLineInterpreter`.
+ * @param args Arguments given by the user in the command line.
+ * @returns Any value or a `Promise` for asynchronous methods.
+ */
+type CommandLineInterpreterCommandCallback = (cli: CommandLineInterpreter, ...args: string[]) => any | Promise<any>;
