@@ -30,10 +30,6 @@ interface CommandLineInterpreter {
 
 	/** The input history. This is also stored in the `localStorage`. */
 	history: string[];
-	// history: Array<string> & { position?: number };
-
-	/** Variables that are defined with a value in this CLI. */
-	variables: Map<string, string>;
 
 	/**
 	 * Evaluate a string expression of commands or variable assignments. Multiple

@@ -87,33 +87,6 @@ class CommandLineInterpreter
 				default:
 					cli.writeLn(`history: Invalid argument: ${args[0]}`);
 			}
-		},
-		/** Display all stored variables. */
-		"printvars": (cli, ...args) =>
-		{
-			switch (args?.[0])
-			{
-				case "--?":
-					cli.writeLn("Usage: printvars")
-						.writeLn("Display all stored variables.");
-					break;
-				case undefined:
-					if (cli.variables.size > 0)
-					{
-						let varEntries = Array.from(cli.variables.entries());
-						for (let [varName, varValue] of varEntries.sort((a, b) => a[0].localeCompare(b[0])))
-						{
-							cli.writeLn(`${varName}=${varValue}`);
-						}
-					}
-					else
-					{
-						cli.writeLn("** There are no variables defined. **");
-					}
-					break;
-				default:
-					cli.writeLn(`printvars: Invalid argument: ${args[0]}`);
-			}
 		}
 	};
 
@@ -156,12 +129,6 @@ class CommandLineInterpreter
 	 * @type {Array<string> & {position?: number, limit?: number}}
 	 */
 	history;
-
-	/**
-	 * Variables that are defined with a value in this CLI.
-	 * @type {Map<string, string>}
-	 */
-	variables;
 
 	/**
 	 * @param {Record<string, CommandLineInterpreterCommandCallback>} commands Custom commands to be available in this CLI.
@@ -241,12 +208,10 @@ class CommandLineInterpreter
 			}
 		}
 		this.history = [];
-		this.variables = new Map();
 		if (localStorage)
 		{
 			let storedData = JSON.parse(localStorage.getItem(this.id) || "{}");
 			this.history = storedData?.history ?? [];
-			Object.entries(storedData?.variables ?? {}).map(([n, v]) => this.variables.set(n, v));
 		};
 		this.history.position = this.history.length;
 		this.commands = new Map();
@@ -310,73 +275,37 @@ class CommandLineInterpreter
 				return /** @type {Promise<void>} */(new Promise((__continue) =>
 				{
 					let immediateContinue = true;
-					let variableAssignment = /^\s*(\S+)\s*=(.*)/.exec(string);
-					if (variableAssignment)
+					let inputValues = /(\S+)(.*)/.exec(string);
+					if (!!inputValues)
 					{
-						if (/\W/.test(variableAssignment[1]))
+						let cmd = inputValues[1];
+						let commandFunction = this.commands.get(cmd);
+						if (typeof commandFunction === "function")
 						{
-							this.writeLn(`Invalid token: ${/\W/.exec(variableAssignment[1])?.[0]}`);
+							let args = [];
+							for (let argMatch of (inputValues[2] ?? "").matchAll(/"([^"]*)"|\S+/g))
+							{
+								args.push(argMatch[1] || argMatch[0]);
+							}
+							try
+							{
+								let cmdResult = commandFunction(this, ...args);
+								if (cmdResult instanceof Promise)
+								{
+									immediateContinue = false;
+									cmdResult
+										.catch(__handleError)
+										.finally(__continue);
+								}
+							}
+							catch (error)
+							{
+								__handleError(error);
+							}
 						}
 						else
 						{
-							let variableName = variableAssignment[1];
-							let variableValue = variableAssignment[2].trim();
-							if (!!variableValue)
-							{
-								this.variables.set(variableName, variableValue);
-							}
-							else
-							{
-								this.variables.delete(variableName);
-							}
-							this.memorize("variables", Object.fromEntries(this.variables.entries()));
-						}
-					}
-					else
-					{
-						let inputValues = /(\S+)(.*)/.exec(string);
-						if (!!inputValues)
-						{
-							let cmd = inputValues[1];
-							let commandFunction = this.commands.get(cmd);
-							if (typeof commandFunction === "function")
-							{
-								let args = [];
-								for (let argMatch of (inputValues[2] ?? "").matchAll(/"([^"]*)"|\S+/g))
-								{
-									args.push(argMatch[1] || argMatch[0]);
-								}
-								args = args.map((arg) =>
-								{
-									if (arg.startsWith("-") === false)
-									{
-										for (let varMatch of arg.matchAll(/\$(\w+)/g))
-										{
-											arg = arg.replace(varMatch[0], this.variables.get(varMatch[1]) ?? varMatch[0]);
-										}
-									}
-									return arg;
-								});
-								try
-								{
-									let cmdResult = commandFunction(this, ...args);
-									if (cmdResult instanceof Promise)
-									{
-										immediateContinue = false;
-										cmdResult
-											.catch(__handleError)
-											.finally(__continue);
-									}
-								}
-								catch (error)
-								{
-									__handleError(error);
-								}
-							}
-							else
-							{
-								this.writeLn(`Unknown command: ${cmd}`);
-							}
+							this.writeLn(`Unknown command: ${cmd}`);
 						}
 					}
 					if (immediateContinue)
