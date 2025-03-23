@@ -1,6 +1,6 @@
 /**
  * These are the commands that are availible in the CLI.
- * @type {Record<string,CommandLineInterpreter_CommandCallback>}
+ * @type {Record<string,CommandLineInterpreterCommandCallback>}
  */
 const cmds = {
 	"formatting": (cli, ...args) =>
@@ -143,7 +143,7 @@ const cmds = {
 
 /**
  * Initialization options for the CLI.
- * @type {CommandLineInterpreter_InitOptions}
+ * @type {CommandLineInterpreterInitOptions}
  */
 const opts = {
 	motd: "Welcome to _Command Line Interpreter!_\n" +

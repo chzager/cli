@@ -10,7 +10,7 @@ class CommandLineInterpreter
 	// TODO: Paste from clipboard as plain text (https://stackoverflow.com/questions/58980235/)
 	/**
 	 * The basic built-in commands for every CLI.
-	 * @type {Record<string, CommandLineInterpreter_CommandCallback>}
+	 * @type {Record<string, CommandLineInterpreterCommandCallback>}
 	 */
 	static builtInCommands = {
 		/** Clear the entire output of the current session. */
@@ -132,7 +132,7 @@ class CommandLineInterpreter
 
 	/**
 	 * Available commands in this CLI.
-	 * @type {Map<string, CommandLineInterpreter_CommandCallback>}
+	 * @type {Map<string, CommandLineInterpreterCommandCallback>}
 	 */
 	commands;
 
@@ -144,8 +144,8 @@ class CommandLineInterpreter
 
 	/**
 	 * Options of this CLI.
-	 * @type {CommandLineInterpreter_Options}
-	 * @typedef CommandLineInterpreter_Options
+	 * @type {CommandLineInterpreterOptions}
+	 * @typedef CommandLineInterpreterOptions
 	 * @property {boolean} richtextEnabled Enable or disable formatting the output text on the CLI.
 	 * @property {number} tabWidth Minimum whitespace string for tab-separated (`\t`) values in output. Default is two.
 	 */
@@ -153,7 +153,7 @@ class CommandLineInterpreter
 
 	/**
 	 * The input history. This is also stored in the `localStorage`.
-	 * @type {Array<string> & {position?: number}}
+	 * @type {Array<string> & {position?: number, limit?: number}}
 	 */
 	history;
 
@@ -164,9 +164,9 @@ class CommandLineInterpreter
 	variables;
 
 	/**
-	 * @param {Record<string, CommandLineInterpreter_CommandCallback>} commands Custom commands to be available in this CLI.
+	 * @param {Record<string, CommandLineInterpreterCommandCallback>} commands Custom commands to be available in this CLI.
 	 * @param {HTMLElement} [target] HTML element on the document where the CLI element shall be displayed.
-	 * @param {CommandLineInterpreter_InitOptions} [options] Options for this CLI.
+	 * @param {CommandLineInterpreterInitOptions} [options] Options for this CLI.
 	 */
 	constructor(commands, target, options)
 	{

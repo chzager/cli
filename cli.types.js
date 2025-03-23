@@ -1,5 +1,5 @@
 /**
- * @typedef CommandLineInterpreter_InitOptions
+ * @typedef CommandLineInterpreterInitOptions
  * Initialization options for the `CommandLineInterpreter`.
  * @property {string} [id] If your web page uses more than one CLI, you may specify unique IDs here.
  * @property {string} [motd] "Message of the day". This text is printed when the CLI is initialized.
@@ -13,7 +13,7 @@
  * @property {"default"|"light"|"white"|"ubuntu"|"custom"} [theme] The theme applied to the CLI instance. To use a custom
  *  theme, select "custom". Please note that you must manually add your custom theme's CSS file to the document.
  *
- * @callback CommandLineInterpreter_CommandCallback
+ * @callback CommandLineInterpreterCommandCallback
  * Callback type for functions ("commands") of the `CommandLineInterpreter`.
  * @param {CommandLineInterpreter} cli The calling `CommandLineInterpreter`.
  * @param {...string} args Arguments given by the user in the command line.

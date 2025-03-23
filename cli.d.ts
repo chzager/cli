@@ -15,7 +15,7 @@ interface CommandLineInterpreter {
 	body: HTMLDivElement;
 
 	/** Available commands in this CLI. */
-	commands: Map<string, CommandLineInterpreter_CommandCallback>;
+	commands: Map<string, CommandLineInterpreterCommandCallback>;
 
 	/** String to be used as command prompt. */
 	prompt: string;
@@ -119,7 +119,7 @@ declare var CommandLineInterpreter: {
 	 * @param target HTML element on the document where the CLI element shall be displayed.
 	 * @param options Options for this CLI.
 	 */
-	new (commands: Record<string, CommandLineInterpreter_InitOptions>, target?: HTMLElement, options?: CommandLineInterpreter_InitOptions): CommandLineInterpreter;
+	new (commands: Record<string, CommandLineInterpreterInitOptions>, target?: HTMLElement, options?: CommandLineInterpreterInitOptions): CommandLineInterpreter;
 
 	/**
 	 * Create a new HTML elemement.
@@ -132,7 +132,7 @@ declare var CommandLineInterpreter: {
 };
 
 /** Initialization options for the `CommandLineInterpreter`. */
-interface CommandLineInterpreter_InitOptions {
+interface CommandLineInterpreterInitOptions {
 	/** If your web page uses more than one CLI, you may specify unique IDs here. */
 	id?: string;
 
@@ -166,7 +166,7 @@ interface CommandLineInterpreter_InitOptions {
 }
 
 /** Callback type for functions ("commands") of the `CommandLineInterpreter`. */
-interface CommandLineInterpreter_CommandCallback {
+interface CommandLineInterpreterCommandCallback {
 	/**
 	 * @param cli The calling `CommandLineInterpreter`.
 	 * @param args Arguments given by the user in the command line.
