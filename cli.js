@@ -50,18 +50,19 @@ class CommandLineInterpreter
 					cli.writeLn(`help: Invalid argument: ${args[0]}`);
 			}
 		},
-		/** Display or manipulate the input history. */
+		/** Display or manage the input history. */
 		"history": (cli, ...args) =>
 		{
 			switch (args?.[0])
 			{
 				case "--?":
 					cli.writeLn("Usage: history [option]")
-						.writeLn("Display or manipulate the list of all that has been entered.")
-						.writeLn("Optional arguments to manipulate the history:")
+						.writeLn("Display or manage the list of all that has been entered.")
+						.writeLn("Optional arguments to manage the history:")
 						.writeLn([
 							"  \t--clean\tRemove duplicate entries and invalid commands",
-							"  \t--clear\tClean the entire history"
+							"  \t--clear\tClean the entire history",
+							"  \t--limit [<n>]\tDisplay or set the limit of history items"
 						].join("\n"));
 					break;
 				case "--clear":
@@ -79,7 +80,22 @@ class CommandLineInterpreter
 					});
 					cli.history.position = cli.history.length;
 					cli.memorize("history", cli.history);
-					cli.writeLn("** The history has been cleaned. **");
+					cli.writeLn("The history has been cleaned.");
+					break;
+				case "--limit":
+					let limitValue = cli.getNamedArgumentValue(args, "--limit") || cli.history.limit;
+					if ((typeof limitValue === "number") || (/[0-9]+/.test(limitValue)))
+					{
+						cli.history.limit = Number(limitValue);
+						cli.history.splice(0, cli.history.length - cli.history.limit);
+						cli.writeLn(`The history is limited to ${cli.history.limit} itmes.`);
+						cli.memorize("history", cli.history);
+						cli.memorize("history_limit", cli.history.limit);
+					}
+					else
+					{
+						cli.writeLn(`history: Not a number: ${limitValue}`);
+					}
 					break;
 				case undefined:
 					cli.writeLn(cli.history.join("\n"));
@@ -149,7 +165,7 @@ class CommandLineInterpreter
 					this.body.scrollBy(0, (this.body.clientHeight - 10));
 					break;
 				case "ArrowUp":
-					if ((this.history.position) && (this.history.position > 0) && (this.history.length > 0))
+					if ((this.history.position > 0) && (this.history.length > 0))
 					{
 						this.history.position -= 1;
 						inputEle.innerText = this.history[this.history.position];
@@ -168,7 +184,7 @@ class CommandLineInterpreter
 					};
 					break;
 				case "ArrowDown":
-					if ((this.history.position) && (this.history.position < this.history.length))
+					if (this.history.position < this.history.length)
 					{
 						this.history.position += 1;
 						inputEle.innerText = (this.history.position === this.history.length) ? "" : this.history[this.history.position];
@@ -182,7 +198,12 @@ class CommandLineInterpreter
 					inputEle.replaceWith(CommandLineInterpreter.createElement("span.input", inputString + "\n"));
 					if (/\w/.test(inputString))
 					{
-						this.history.position = (this.history[this.history.length - 1] !== inputString) ? this.history.push(inputString.trim()) : this.history.length;
+						if (this.history[this.history.length - 1] !== inputString)
+						{
+							this.history.push(inputString.trim());
+						}
+						cli.history.splice(0, cli.history.length - cli.history.limit);
+						this.history.position = this.history.length;
 						this.memorize("history", this.history);
 					}
 					this.eval(inputString.trim())
@@ -201,18 +222,15 @@ class CommandLineInterpreter
 		if (options?.theme !== "custom")
 		{
 			let themeFileUrl = `link[rel="stylesheet"][href="https://cdn.jsdelivr.net/gh/chzager/cli/themes/${options?.theme || "default"}.css"]`;
-			// let themeFileUrl = `link[rel="stylesheet"][href="../themes/${options?.theme || "default"}.css"]`;
 			if (!document.head.querySelector(themeFileUrl))
 			{
 				document.head.append(CommandLineInterpreter.createElement(themeFileUrl));
 			}
 		}
 		this.history = [];
-		if (localStorage)
-		{
-			let storedData = JSON.parse(localStorage.getItem(this.id) || "{}");
-			this.history = storedData?.history ?? [];
-		};
+		let storedData = JSON.parse(localStorage.getItem(this.id) || "{}");
+		this.history = storedData?.history ?? [];
+		this.history.limit = Number(storedData?.history_limit) || 50;
 		this.history.position = this.history.length;
 		this.commands = new Map();
 		for (let commandProvider of [CommandLineInterpreter.builtInCommands, commands])
