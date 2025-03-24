@@ -1,9 +1,10 @@
 // @ts-check
 /**
  * Command Line Interpreter.
- * @link https://github.com/chzager/cli
+ * @version 1.0.0
  * @copyright (c) 2025 Christoph Zager
  * @license MIT
+ * @link https://github.com/chzager/cli
  */
 class CommandLineInterpreter
 {
