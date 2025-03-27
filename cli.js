@@ -203,7 +203,7 @@ class CommandLineInterpreter
 						{
 							this.history.push(inputString.trim());
 						}
-						cli.history.splice(0, cli.history.length - cli.history.limit);
+						this.history.splice(0, this.history.length - this.history.limit);
 						this.history.position = this.history.length;
 						this.memorize("history", this.history);
 					}
