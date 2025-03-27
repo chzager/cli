@@ -1,5 +1,5 @@
 /**
- * Command Line Interpreter.
+ * Command Line Interpreter – a console GUI element for text-based user interaction within web applications.
  * @version 1.0.0
  * @copyright (c) 2025 Christoph Zager
  * @license MIT
@@ -117,15 +117,7 @@ declare var CommandLineInterpreter: {
 	 * @param options Options for this CLI.
 	 */
 	new (commands: Record<string, CommandLineInterpreterCommandCallback>, target?: HTMLElement, options?: CommandLineInterpreterInitOptions): CommandLineInterpreter;
-
-	/**
-	 * Create a new HTML elemement.
-	 * @param tag The tag of the desired HTML element. This may include css classes and attributes.
-	 * @param children Content (or child elements) to be created on/in the HTML element.
-	 * @returns The newly created HTML element.
-	 */
-	createElement(tag: string, ...children: (string | HTMLElement)[]): HTMLElement;
-	readonly prototype: CommandLineInterpreter;
+	prototype: CommandLineInterpreter;
 };
 
 /** Initialization options for the `CommandLineInterpreter`. */

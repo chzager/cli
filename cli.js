@@ -1,6 +1,6 @@
 // @ts-check
 /**
- * Command Line Interpreter.
+ * Command Line Interpreter – a console GUI element for text-based user interaction within web applications.
  * @version 1.0.0
  * @copyright (c) 2025 Christoph Zager
  * @license MIT
