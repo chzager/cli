@@ -8,7 +8,6 @@
  */
 class CommandLineInterpreter
 {
-	// TODO: Paste from clipboard as plain text (https://stackoverflow.com/questions/58980235/)
 	/**
 	 * The basic built-in commands for every CLI.
 	 * @type {Record<string, CommandLineInterpreterCommandCallback>}
@@ -40,11 +39,11 @@ class CommandLineInterpreter
 						.writeLn("Display a list of all available commands.");
 					break;
 				case undefined:
-					cli.writeLn("These are the available commands:");
-					cli.writeLn(Array.from(cli.commands.keys())
-						.sort()
-						.map((s) => `\t${s}`).join("\n")
-					);
+					cli.writeLn("These are the available commands:")
+						.writeLn(Array.from(cli.commands.keys())
+							.sort()
+							.map((s) => `\t${s}`).join("\n")
+						);
 					cli.writeLn("\nTry `<command> --?` for more information on a specific command.");
 					break;
 				default:
@@ -133,11 +132,13 @@ class CommandLineInterpreter
 	prompt;
 
 	/**
-	 * Options of this CLI.
-	 * @type {CommandLineInterpreterOptions}
 	 * @typedef CommandLineInterpreterOptions
 	 * @property {boolean} richtextEnabled Enable or disable formatting the output text on the CLI.
 	 * @property {number} tabWidth Minimum whitespace string for tab-separated (`\t`) values in output. Default is two.
+	 */
+	/**
+	 * Options of this CLI.
+	 * @type {CommandLineInterpreterOptions}
 	 */
 	options;
 
@@ -251,7 +252,7 @@ class CommandLineInterpreter
 		{
 			if (window.getSelection()?.toString() === "")
 			{
-				let inputEle = this.body.querySelector(`.input[contenteditable="true"]`);
+				let inputEle = this.body.querySelector(`.input[contenteditable="plaintext-only"]`);
 				if (inputEle instanceof HTMLElement)
 				{
 					inputEle.focus();
@@ -362,7 +363,7 @@ class CommandLineInterpreter
 	receiveInput (prompt, keyHandler)
 	{
 		this.write(prompt);
-		let inputEle = CommandLineInterpreter.createElement(`span.input[contenteditable="true"][spellcheck="false"][autocorrect="off"][autocapitalize="none"]`);
+		let inputEle = CommandLineInterpreter.createElement(`span.input[contenteditable="plaintext-only"][spellcheck="false"][autocorrect="off"][autocapitalize="none"]`);
 		inputEle.onkeydown = (/** @type {KeyboardEvent} */ event) =>
 		{
 			event.stopImmediatePropagation();
