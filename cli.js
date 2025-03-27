@@ -169,20 +169,17 @@ class CommandLineInterpreter
 				case "ArrowUp":
 					if ((this.history.position > 0) && (this.history.length > 0))
 					{
+						event.preventDefault();
 						this.history.position -= 1;
 						inputEle.innerText = this.history[this.history.position];
-						setTimeout(() =>
+						let selection = window.getSelection();
+						if (!!selection)
 						{
+							selection.removeAllRanges();
 							let range = document.createRange();
-							let selection = window.getSelection();
-							if (!!selection)
-							{
-								range.setStart(inputEle.childNodes[0], inputEle.innerText.length);
-								range.setEnd(inputEle.childNodes[0], inputEle.innerText.length);
-								selection.removeAllRanges();
-								selection.addRange(range);
-							}
-						}, 10);
+							range.setStartAfter(inputEle.childNodes[0]);
+							selection.addRange(range);
+						}
 					};
 					break;
 				case "ArrowDown":
@@ -369,8 +366,8 @@ class CommandLineInterpreter
 			event.stopImmediatePropagation();
 			keyHandler(event);
 		};
-		setTimeout(() =>
-		{ // Isolate from any event.
+		setTimeout(() => // (To isolate from any event.)
+		{
 			this.body.appendChild(inputEle);
 			this.body.scrollTo(0, this.body.scrollHeight);
 			inputEle.focus();
