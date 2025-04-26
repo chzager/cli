@@ -439,24 +439,22 @@ class CommandLineInterpreter
 		{
 			/** @type {Array<string|HTMLElement>} */
 			let chunks = [];
-			let tokens = /((\*{1,2}|_{1,2}|`)([^\*\s].*?)\2)|((http)s?:\/\/\S+\b)|((\x1b\[)(3[0-7]|0)m(.*))/g;
+			let tokens = /((\*{1,2}|_{1,2}|`)([^\s].*?)\2)|((http)s?:\/\/\S+\b)|((\x1b\[)(3[0-7]|0)m(.*))/g;
 			for (let match of text.matchAll(tokens))
 			{
 				/** @type {string} */
 				let tag = "span";
 				/** @type {Array<string|HTMLElement>} */
 				let innerNodes = [];
-				let token = match[2] ?? match[5] ?? match[7]; // format-tag OR "http" OR color tag
+				let token = match[2] ?? match[5] ?? match[7]; // Format tag OR "http" OR color tag
 				let content = match[3] ?? match[4] ?? match[9];
-				let index = text.indexOf(content);
+				let index = text.indexOf(token);
 				let contentLength = content.length;
 				if (token === "\x1b[")
 				{
-					let tagLength = match[8].length + 3; // 3 = "\xb1" + "[" + "m"
-					contentLength += tagLength;
+					contentLength += match[8].length + 3; // 3 = "\xb1" + "[" + "m";
 					if (!!content)
 					{
-						index -= tagLength;
 						let color = "--cli-color-foreground";
 						switch (match[8])
 						{
@@ -488,10 +486,6 @@ class CommandLineInterpreter
 						tag = `span[style="color:var(${color}"]`;
 						innerNodes = __format(content);
 					}
-					else
-					{
-						index = text.indexOf(match[6]);
-					}
 				}
 				else if (token === "http")
 				{
@@ -517,7 +511,6 @@ class CommandLineInterpreter
 							innerNodes = [content];
 							break;
 					}
-					index -= token.length;
 					contentLength += (token.length * 2);
 				}
 				chunks.push(text.substring(0, index), CommandLineInterpreter.createElement(tag, ...innerNodes));
