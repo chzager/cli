@@ -17,10 +17,13 @@ const cmds = {
 						"\t\tdisable\tDisable rich text formatting in output"
 					].join("\n"));
 			case "styles":
-				// TODO Text styling examples
+				cli.writeLn("Output text can be styled **bold**, _italic_ and as `code` using Markdown syntax.")
+					.writeLn("To bold text, add two asterisks or underscores before and after a word or phrase: `**bold**` or `__bold__`")
+					.writeLn("To italicize text, add one asterisk or underscore before and after a word or phrase: `*italic*` or `_italic_`")
+					.writeLn("To denote a word or phrase as code, enclose it in backticks: ``code...````");
 				break;
 			case "colors":
-				cli.writeLn("To set the text color of the output text, use the escape-sequence `\\x1b[XXm` in your string, where \"XX\" is the value of the desired color:")
+				cli.writeLn("To set the color of the output text, use the escape-sequence `\\x1b[XXm` in your string, where \"XX\" is the value of the desired color:")
 					.writeLn([
 						"\t\t30\t\x1b[30mBlack",
 						"\t\t31\t\x1b[31mRed",
@@ -132,6 +135,10 @@ const cmds = {
 						styleElement.remove();
 					}
 					document.head.append(CommandLineInterpreter.createElement(`link[rel="stylesheet"][href="${THEME_URL_ROOT}${args[0]}.css"]`));
+					setTimeout(() =>
+					{
+						cli.body.scrollTop = cli.body.scrollHeight;
+					}, 250);
 				}
 				else
 				{
