@@ -453,39 +453,36 @@ class CommandLineInterpreter
 				if (token === "\x1b[")
 				{
 					contentLength += match[8].length + 3; // 3 = "\xb1" + "[" + "m";
-					if (!!content)
+					let color = "--cli-color-foreground";
+					switch (match[8])
 					{
-						let color = "--cli-color-foreground";
-						switch (match[8])
-						{
-							case "30":
-								color = "--cli-color-black";
-								break;
-							case "31":
-								color = "--cli-color-red";
-								break;
-							case "32":
-								color = "--cli-color-green";
-								break;
-							case "33":
-								color = "--cli-color-yellow";
-								break;
-							case "34":
-								color = "--cli-color-blue";
-								break;
-							case "35":
-								color = "--cli-color-magenta";
-								break;
-							case "36":
-								color = "--cli-color-cyan";
-								break;
-							case "37":
-								color = "--cli-color-white";
-								break;
-						}
-						tag = `span[style="color:var(${color}"]`;
-						innerNodes = __format(content);
+						case "30":
+							color = "--cli-color-black";
+							break;
+						case "31":
+							color = "--cli-color-red";
+							break;
+						case "32":
+							color = "--cli-color-green";
+							break;
+						case "33":
+							color = "--cli-color-yellow";
+							break;
+						case "34":
+							color = "--cli-color-blue";
+							break;
+						case "35":
+							color = "--cli-color-magenta";
+							break;
+						case "36":
+							color = "--cli-color-cyan";
+							break;
+						case "37":
+							color = "--cli-color-white";
+							break;
 					}
+					tag = `span[style="color:var(${color}"]`;
+					innerNodes = __format(content);
 				}
 				else if (token === "http")
 				{
