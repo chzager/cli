@@ -31,6 +31,7 @@
 }
 #CommandLineInterpreter a:hover {
 	color: var(--cli-color-magenta);
+	min-height: 1em;
 }
 #CommandLineInterpreter code {
 	color: #d3d7cf;

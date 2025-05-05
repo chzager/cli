@@ -25,6 +25,7 @@
 }
 #CommandLineInterpreter span.input {
 	word-break: break-all;
+	min-height: 1em;
 }
 #CommandLineInterpreter a {
 	text-decoration: underline;
