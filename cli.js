@@ -359,6 +359,7 @@ class CommandLineInterpreter
 	 */
 	receiveInput (prompt, keyHandler)
 	{
+		this.body.normalize();
 		this.write(prompt);
 		let inputEle = CommandLineInterpreter.createElement(`span.input[contenteditable="true"][spellcheck="false"][autocorrect="off"][autocapitalize="none"]`);
 		inputEle.addEventListener("paste", (/** @type {ClipboardEvent} */ evt) =>
