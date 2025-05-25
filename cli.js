@@ -249,7 +249,7 @@ class CommandLineInterpreter
 		{
 			if (window.getSelection()?.toString() === "")
 			{
-				let inputEle = this.body.querySelector(`.input[contenteditable="plaintext-only"]`);
+				let inputEle = this.body.querySelector(`.input[contenteditable="true"]`);
 				if (inputEle instanceof HTMLElement)
 				{
 					inputEle.focus();
@@ -360,7 +360,24 @@ class CommandLineInterpreter
 	receiveInput (prompt, keyHandler)
 	{
 		this.write(prompt);
-		let inputEle = CommandLineInterpreter.createElement(`span.input[contenteditable="plaintext-only"][spellcheck="false"][autocorrect="off"][autocapitalize="none"]`);
+		let inputEle = CommandLineInterpreter.createElement(`span.input[contenteditable="true"][spellcheck="false"][autocorrect="off"][autocapitalize="none"]`);
+		inputEle.addEventListener("paste", (/** @type {ClipboardEvent} */ evt) =>
+		{
+			evt.preventDefault();
+			let clipboardText = evt.clipboardData.getData('text/plain');
+			let selection = window.getSelection();
+			if (selection)
+			{
+				let selectRange = selection.getRangeAt(0);
+				let oldRangeStart = selectRange.startOffset;
+				let inputText = inputEle.innerText;
+				inputEle.innerText = inputText.substring(0, oldRangeStart) + clipboardText + inputText.substring(selectRange.endOffset, inputText.length);
+				selection.removeAllRanges();
+				let newRange = document.createRange();
+				newRange.setStart(inputEle.childNodes[0], oldRangeStart + clipboardText.length);
+				selection.addRange(newRange);
+			}
+		});
 		inputEle.onkeydown = (/** @type {KeyboardEvent} */ event) =>
 		{
 			event.stopImmediatePropagation();
