@@ -499,7 +499,7 @@ class CommandLineInterpreter
 							color = "--cli-color-white";
 							break;
 					}
-					tag = `span[style="color:var(${color}"]`;
+					tag = `span[style="color:var(${color})"]`;
 					innerNodes = __format(content);
 				}
 				else if (token === "http")
