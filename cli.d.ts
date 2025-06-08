@@ -151,7 +151,7 @@ interface CommandLineInterpreterInitOptions {
 	 * The theme applied to the CLI instance. To use a custom theme, select "custom". Please
 	 * note that you must manually add your custom theme's CSS file to the document.
 	 */
-	theme?: "default" | "light" | "white" | "ubuntu" | "custom";
+	theme?: "default" | "light" | "white" | "black" | "ubuntu" | "custom";
 }
 
 /**

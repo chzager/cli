@@ -117,7 +117,7 @@ const cmds = {
 	},
 	"theme": (cli, ...args) =>
 	{
-		const THEMES = ["default", "light", "white", "ubuntu"];
+		const THEMES = ["default", "light", "white", "black", "ubuntu"];
 		const THEME_URL_ROOT = "https://cdn.jsdelivr.net/gh/chzager/cli/themes/";
 		switch (args?.[0])
 		{
