@@ -32,11 +32,10 @@
 	color: #00f;
 }
 #CommandLineInterpreter code {
-	color: inherit;
+	color: #555;
 	background-color: #ededed;
 	border-radius: 0.3em;
 	padding: 0 0.2em;
 	margin: 0 -0.2em;
 	border: 1px solid #ccc;
-	color: #555;
 }
