@@ -457,79 +457,88 @@ class CommandLineInterpreter
 		{
 			/** @type {Array<string|HTMLElement>} */
 			let chunks = [];
-			let tokens = /((\*{1,2}|_{1,2}|`)([^\s].*?)\2)|((http)s?:\/\/\S+\b)|((\x1b\[)(3[0-7]|0)m(.*))/g;
-			for (let match of text.matchAll(tokens))
+			/** @type {RegExpExecArray} */
+			let match;
+			while ((match = /((\\)([*_´]))|((\*{1,2}|_{1,2}|`)([^\s].*?)\5)|((http)s?:\/\/\S+\b)|((\x1b\[)(3[0-7]|0)m(.*))/g.exec(text)))
 			{
-				/** @type {string} */
-				let tag = "span";
-				/** @type {Array<string|HTMLElement>} */
-				let innerNodes = [];
-				let token = match[2] ?? match[5] ?? match[7]; // Format tag OR "http" OR color tag
-				let content = match[3] ?? match[4] ?? match[9];
-				let index = text.indexOf(token);
-				let contentLength = content.length;
-				if (token === "\x1b[")
+				const token = match[2] ?? match[5] ?? match[8] ?? match[10]; // Escaped format tag OR format tag OR "http" OR color tag
+				const content = match[3] ?? match[6] ?? match[7] ?? match[12];
+				const index = text.indexOf(token);
+				if (token === "\\")
 				{
-					contentLength += match[8].length + 3; // 3 = "\xb1" + "[" + "m";
-					let color = "--cli-color-foreground";
-					switch (match[8])
-					{
-						case "30":
-							color = "--cli-color-black";
-							break;
-						case "31":
-							color = "--cli-color-red";
-							break;
-						case "32":
-							color = "--cli-color-green";
-							break;
-						case "33":
-							color = "--cli-color-yellow";
-							break;
-						case "34":
-							color = "--cli-color-blue";
-							break;
-						case "35":
-							color = "--cli-color-magenta";
-							break;
-						case "36":
-							color = "--cli-color-cyan";
-							break;
-						case "37":
-							color = "--cli-color-white";
-							break;
-					}
-					tag = `span[style="color:var(${color})"]`;
-					innerNodes = __format(content);
-				}
-				else if (token === "http")
-				{
-					tag = `a[href="${content}"][target="_blank"]`;
-					innerNodes = [content];
+					chunks.push(text.substring(0, index), content);
+					text = text.substring(index + 2); // 2 = token character + formatting character
 				}
 				else
 				{
-					switch (token)
+					/** @type {string} */
+					let tag = "span";
+					/** @type {Array<string|HTMLElement>} */
+					let innerNodes = [];
+					let contentLength = content.length;
+					if (token === "\x1b[")
 					{
-						case "**":
-						case "__":
-							tag = "b";
-							innerNodes = __format(content);
-							break;
-						case "*":
-						case "_":
-							tag = "i";
-							innerNodes = __format(content);
-							break;
-						case "`":
-							tag = "code";
-							innerNodes = [content];
-							break;
+						contentLength += match[11].length + 3; // 3 = "\xb1" + "[" + "m";
+						let color = "--cli-color-foreground";
+						switch (match[11])
+						{
+							case "30":
+								color = "--cli-color-black";
+								break;
+							case "31":
+								color = "--cli-color-red";
+								break;
+							case "32":
+								color = "--cli-color-green";
+								break;
+							case "33":
+								color = "--cli-color-yellow";
+								break;
+							case "34":
+								color = "--cli-color-blue";
+								break;
+							case "35":
+								color = "--cli-color-magenta";
+								break;
+							case "36":
+								color = "--cli-color-cyan";
+								break;
+							case "37":
+								color = "--cli-color-white";
+								break;
+						}
+						tag = `span[style="color:var(${color})"]`;
+						innerNodes = __format(content);
 					}
-					contentLength += (token.length * 2);
+					else if (token === "http")
+					{
+						tag = `a[href="${content}"][target="_blank"]`;
+						innerNodes = [content];
+					}
+					else
+					{
+						switch (token)
+						{
+							case "**":
+							case "__":
+								tag = "b";
+								innerNodes = __format(content);
+								break;
+							case "*":
+							case "_":
+								tag = "i";
+								innerNodes = __format(content);
+								break;
+							case "`":
+								tag = "code";
+								innerNodes = [content];
+								break;
+						}
+						contentLength += (token.length * 2);
+					}
+					chunks.push(text.substring(0, index), CommandLineInterpreter.createElement(tag, ...innerNodes));
+					text = text.substring(index + contentLength);
 				}
-				chunks.push(text.substring(0, index), CommandLineInterpreter.createElement(tag, ...innerNodes));
-				text = text.substring(index + contentLength);
 			}
 			chunks.push(text);
 			return chunks;
