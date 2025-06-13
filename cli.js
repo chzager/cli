@@ -243,8 +243,8 @@ class CommandLineInterpreter
 			}
 		}
 		// @ts-ignore missing deprecated property 'align'.
-		this.body = CommandLineInterpreter.createElement("div");
-		this.body.id = this.constructor.name;
+		this.body = (target instanceof HTMLElement) ? target : target = document.body.appendChild(CommandLineInterpreter.createElement("div"));
+		this.body.classList.add(CommandLineInterpreter.name.toLowerCase());
 		this.body.onclick = () =>
 		{
 			if (window.getSelection()?.toString() === "")
@@ -256,11 +256,6 @@ class CommandLineInterpreter
 				}
 			}
 		};
-		if (!(target instanceof HTMLElement))
-		{
-			target = document.body;
-		}
-		target.appendChild(this.body);
 		if (!!options?.motd)
 		{
 			this.writeLn(options.motd);
@@ -727,7 +722,7 @@ addEventListener("DOMContentLoaded", () =>
 {
 	document.head.appendChild(CommandLineInterpreter.createElement(
 		"style",
-		`#${CommandLineInterpreter.name} * {${[
+		`.${CommandLineInterpreter.name.toLowerCase()} * {${[
 			"background-color: transparent;",
 			"color: inherit;",
 			"font-family: inherit;",

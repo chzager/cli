@@ -1,4 +1,4 @@
-#CommandLineInterpreter {
+.commandlineinterpreter {
 	--cli-color-background: #f4f4f4;
 	--cli-color-foreground: #228;
 	--cli-color-black: #333;
@@ -20,18 +20,18 @@
 	box-sizing: border-box;
 	cursor: text;
 }
-#CommandLineInterpreter span.input {
+.commandlineinterpreter span.input {
 	word-break: break-all;
 	min-height: 1em;
 }
-#CommandLineInterpreter a {
+.commandlineinterpreter a {
 	text-decoration: underline;
 	cursor: pointer;
 }
-#CommandLineInterpreter a:hover {
+.commandlineinterpreter a:hover {
 	color: #00f;
 }
-#CommandLineInterpreter code {
+.commandlineinterpreter code {
 	color: inherit;
 	background-color: #ededed;
 	border-radius: 0.3em;

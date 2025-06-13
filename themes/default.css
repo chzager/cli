@@ -1,6 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,400..600");
 
-#CommandLineInterpreter {
+.commandlineinterpreter {
 	--cli-color-background: #235;
 	--cli-color-foreground: #ccc;
 	--cli-color-black: #777;
@@ -23,18 +23,18 @@
 	box-sizing: border-box;
 	cursor: text;
 }
-#CommandLineInterpreter span.input {
+.commandlineinterpreter span.input {
 	word-break: break-all;
 	min-height: 1em;
 }
-#CommandLineInterpreter a {
+.commandlineinterpreter a {
 	text-decoration: underline;
 	cursor: pointer;
 }
-#CommandLineInterpreter a:hover {
+.commandlineinterpreter a:hover {
 	color: var(--cli-color-white);
 }
-#CommandLineInterpreter code {
+.commandlineinterpreter code {
 	color: #d8d8d8;
 	background-color: #3e4d69;
 	border-radius: 0.3em;

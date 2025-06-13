@@ -1,6 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Ubuntu+Mono:ital,wght@0,400;0,700;1,400;1,700&family=VT323&display=swap");
 
-#CommandLineInterpreter {
+.commandlineinterpreter {
 	--cli-color-background: #300a24;
 	--cli-color-foreground: #eeeeec;
 	--cli-color-black: #555753;
@@ -22,18 +22,18 @@
 	box-sizing: border-box;
 	cursor: text;
 }
-#CommandLineInterpreter span.input {
+.commandlineinterpreter span.input {
 	word-break: break-all;
 }
-#CommandLineInterpreter a {
+.commandlineinterpreter a {
 	text-decoration: underline;
 	cursor: pointer;
 }
-#CommandLineInterpreter a:hover {
+.commandlineinterpreter a:hover {
 	color: var(--cli-color-magenta);
 	min-height: 1em;
 }
-#CommandLineInterpreter code {
+.commandlineinterpreter code {
 	color: #d3d7cf;
 	background-color: #503045;
 	border: 1px solid #afa2a9;
