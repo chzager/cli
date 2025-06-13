@@ -1,6 +1,6 @@
 /**
  * Command Line Interpreter – a console GUI element for text-based user interaction within web applications.
- * @version 1.0.2
+ * @version 1.0.3
  * @copyright (c) 2025 Christoph Zager
  * @license MIT
  * @link https://github.com/chzager/cli
